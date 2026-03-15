@@ -1,0 +1,151 @@
+<div class="recipe-form-container">
+  <h1>{{ isEditMode() ? 'Edit Recipe' : 'Create New Recipe' }}</h1>
+
+  <div class="form-sections">
+    <!-- Basic Information -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>Basic Information</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Recipe Name</mat-label>
+            <input matInput [(ngModel)]="recipe().name" placeholder="Enter recipe name...">
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput [(ngModel)]="recipe().description" placeholder="Enter recipe description..." rows="3"></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row-3">
+          <mat-form-field appearance="outline">
+            <mat-label>Servings</mat-label>
+            <input matInput type="number" [(ngModel)]="recipe().servings" min="1">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Prep Time (minutes)</mat-label>
+            <input matInput type="number" [(ngModel)]="recipe().prepTime" min="0">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Cook Time (minutes)</mat-label>
+            <input matInput type="number" [(ngModel)]="recipe().cookTime" min="0">
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Ingredients Section -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>Ingredients</mat-card-title>
+        <button mat-icon-button (click)="addIngredient()" class="add-button">
+          <mat-icon>add</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        @if (recipe().ingredients && recipe().ingredients!.length > 0) {
+          <div class="ingredients-form">
+            @for (ingredient of recipe().ingredients!; track $index; let i = $index) {
+              <div class="ingredient-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Ingredient</mat-label>
+                  <input matInput [ngModel]="ingredient.name" (ngModelChange)="updateIngredient(i, 'name', $event)" placeholder="e.g., Flour">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Amount</mat-label>
+                  <input matInput type="number" [ngModel]="ingredient.amount" placeholder="Amount" (ngModelChange)="updateIngredient(i, 'amount', $event)">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Unit</mat-label>
+                  <input matInput [ngModel]="ingredient.unit" (ngModelChange)="updateIngredient(i, 'unit', $event)" placeholder="e.g., cups, grams">
+                </mat-form-field>
+
+                @if (recipe().ingredients!.length > 1) {
+                  <button mat-icon-button color="warn" (click)="removeIngredient(i)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Instructions Section -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>Instructions</mat-card-title>
+        <button mat-icon-button (click)="addInstruction()" class="add-button">
+          <mat-icon>add</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        @if (recipe().instructions && recipe().instructions!.length > 0) {
+          <div class="instructions-form">
+            @for (instruction of recipe().instructions!; track $index; let i = $index) {
+              <div class="instruction-row">
+                <div class="step-number">Step {{ i + 1 }}</div>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Instruction</mat-label>
+                  <textarea matInput [ngModel]="instruction" (ngModelChange)="updateInstruction(i, $event)" placeholder="Enter cooking instruction..." rows="2"></textarea>
+                </mat-form-field>
+
+                @if (recipe().instructions!.length > 1) {
+                  <div class="reorder-buttons">
+                    <button mat-icon-button (click)="moveInstructionUp(i)" [disabled]="i === 0">
+                      <mat-icon>arrow_upward</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="moveInstructionDown(i)" [disabled]="i === recipe().instructions!.length - 1">
+                      <mat-icon>arrow_downward</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="removeInstruction(i)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Image Section (Optional) -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>Recipe Image (Optional)</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Image URL or Base64</mat-label>
+            <input matInput [(ngModel)]="recipe().image" placeholder="Enter image URL...">
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <button mat-raised-button color="primary" (click)="saveRecipe()">
+      <mat-icon>save</mat-icon>
+      Save Recipe
+    </button>
+    <button mat-stroked-button (click)="cancel()">
+      <mat-icon>close</mat-icon>
+      Cancel
+    </button>
+  </div>
+</div>
+

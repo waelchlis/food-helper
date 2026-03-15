@@ -1,0 +1,113 @@
+<mat-toolbar color="primary" class="header-toolbar">
+  <span class="title">🥬 Specialty Food Webshop</span>
+  <span class="spacer"></span>
+  <button mat-icon-button [matBadge]="cartCount()" matBadgeColor="accent" (click)="showCart.set(!showCart())"
+    [attr.aria-label]="'View cart with ' + cartCount() + ' items'">
+    <mat-icon>shopping_cart</mat-icon>
+  </button>
+</mat-toolbar>
+
+<div class="shop-container">
+  <!-- Products Section -->
+  <div class="catalog-section" [class.cart-open]="showCart()">
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <h2>Categories</h2>
+      <div class="category-chips">
+        @for (category of categories; track category.id) {
+          <button mat-raised-button [class.active]="selectedCategory() === category.id"
+            (click)="selectedCategory.set(category.id)"
+            [color]="selectedCategory() === category.id ? 'accent' : ''">
+            {{ category.name }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="products-grid">
+      @if (filteredProducts().length > 0) {
+        @for (product of filteredProducts(); track product.id) {
+          <mat-card class="product-card">
+            <mat-card-header>
+              <mat-card-title>{{ product.name }}</mat-card-title>
+              <mat-card-subtitle class="category-badge">{{ product.category | titlecase }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="description">{{ product.description }}</p>
+              <p class="price">${{ product.price.toFixed(2) }}</p>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-raised-button color="primary" (click)="addToCart(product)">
+                <mat-icon>add_shopping_cart</mat-icon>
+                Add to Cart
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        }
+      } @else {
+        <p class="no-products">No products found in this category.</p>
+      }
+    </div>
+  </div>
+
+  <!-- Cart Sidebar -->
+  @if (showCart()) {
+    <div class="cart-sidebar">
+      <div class="cart-header">
+        <h2>Shopping Cart</h2>
+        <button mat-icon-button (click)="showCart.set(false)" aria-label="Close cart">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      @if (cartItems().length > 0) {
+        <div class="cart-items">
+          @for (item of cartItems(); track item.product.id) {
+            <div class="cart-item">
+              <div class="item-details">
+                <h4>{{ item.product.name }}</h4>
+                <p>${{ item.product.price.toFixed(2) }}</p>
+              </div>
+              <div class="item-controls">
+                <button mat-icon-button (click)="updateQuantity(item.product.id, item.quantity - 1)"
+                  [disabled]="item.quantity <= 1">
+                  <mat-icon>remove</mat-icon>
+                </button>
+                <input type="number" [(ngModel)]="item.quantity"
+                  (change)="updateQuantity(item.product.id, item.quantity)" min="1" class="quantity-input">
+                <button mat-icon-button (click)="updateQuantity(item.product.id, item.quantity + 1)">
+                  <mat-icon>add</mat-icon>
+                </button>
+              </div>
+              <span class="item-total">${{ (item.product.price * item.quantity).toFixed(2) }}</span>
+              <button mat-icon-button (click)="removeFromCart(item.product.id)" color="warn">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            <mat-divider></mat-divider>
+          }
+        </div>
+
+        <div class="cart-footer">
+          <div class="cart-total">
+            <h3>Total:</h3>
+            <h3 class="total-amount">${{ cartTotal().toFixed(2) }}</h3>
+          </div>
+          <button mat-raised-button color="primary" class="checkout-btn">
+            Proceed to Checkout
+          </button>
+          <button mat-stroked-button (click)="clearCart()" color="warn" class="clear-btn">
+            Clear Cart
+          </button>
+        </div>
+      } @else {
+        <div class="empty-cart">
+          <mat-icon>shopping_cart</mat-icon>
+          <p>Your cart is empty</p>
+          <p class="hint">Add items from the catalog to get started</p>
+        </div>
+      }
+    </div>
+  }
+</div>

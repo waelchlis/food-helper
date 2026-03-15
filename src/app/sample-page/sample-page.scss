@@ -1,0 +1,344 @@
+.header-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  .title {
+    font-size: 1.3rem;
+    font-weight: 500;
+  }
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+}
+
+.shop-container {
+  display: flex;
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem 2rem;
+  position: relative;
+
+  @media (max-width: 768px) {
+    gap: 0;
+  }
+}
+
+// Catalog Section
+.catalog-section {
+  flex: 1;
+  transition: all 0.3s ease;
+
+  @media (max-width: 768px) {
+    &.cart-open {
+      display: none;
+    }
+  }
+}
+
+// Filter Section
+.filter-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  h2 {
+    margin: 0 0 1rem;
+    font-size: 1.2rem;
+  }
+
+  .category-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+
+    button {
+      transition: all 0.3s ease;
+
+      &.active {
+        background-color: #1976d2 !important;
+        color: white !important;
+      }
+
+      &:hover:not(.active) {
+        background-color: #e8e8e8 !important;
+      }
+    }
+  }
+}
+
+// Products Grid
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .product-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      transform: translateY(-4px);
+    }
+
+    mat-card-header {
+      padding: 1rem;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    mat-card-title {
+      font-size: 1.1rem;
+      margin: 0;
+    }
+
+    mat-card-subtitle {
+      margin-top: 0.5rem;
+    }
+
+    .category-badge {
+      display: inline-block;
+      background-color: #f0f0f0;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #666;
+    }
+
+    mat-card-content {
+      flex-grow: 1;
+      padding: 1rem;
+
+      .description {
+        color: #666;
+        font-size: 0.9rem;
+        margin: 0 0 1rem;
+        line-height: 1.4;
+      }
+
+      .price {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1976d2;
+        margin: 0;
+      }
+    }
+
+    mat-card-actions {
+      padding: 1rem;
+      border-top: 1px solid #f0f0f0;
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+
+  .no-products {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    color: #999;
+    font-size: 1.1rem;
+  }
+}
+
+// Cart Sidebar
+.cart-sidebar {
+  width: 380px;
+  background-color: #fff;
+  border-left: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 100px);
+  position: sticky;
+  top: 100px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 1024px) {
+    width: 320px;
+  }
+
+  @media (max-width: 768px) {
+    position: fixed;
+    top: 64px;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 100vh;
+    z-index: 50;
+    border-left: none;
+    border-radius: 0;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .cart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+
+    h2 {
+      margin: 0;
+      font-size: 1.3rem;
+    }
+  }
+
+  .cart-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+
+    .cart-item {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+
+      .item-details {
+        flex: 1;
+
+        h4 {
+          margin: 0;
+          font-size: 0.95rem;
+        }
+
+        p {
+          margin: 0.25rem 0 0;
+          color: #1976d2;
+          font-weight: 600;
+          font-size: 0.9rem;
+        }
+      }
+
+      .item-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        button {
+          padding: 0.25rem;
+        }
+
+        .quantity-input {
+          width: 40px;
+          padding: 0.25rem;
+          text-align: center;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-size: 0.9rem;
+
+          &:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+          }
+        }
+      }
+
+      .item-total {
+        font-weight: 600;
+        color: #333;
+        min-width: 55px;
+        text-align: right;
+      }
+    }
+  }
+
+  .cart-footer {
+    padding: 1.5rem;
+    border-top: 1px solid #f0f0f0;
+    background-color: #f9f9f9;
+
+    .cart-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      h3 {
+        margin: 0;
+        font-size: 1.1rem;
+      }
+
+      .total-amount {
+        color: #1976d2;
+        font-size: 1.5rem;
+      }
+    }
+
+    button {
+      width: 100%;
+      margin-top: 0.75rem;
+    }
+  }
+
+  .empty-cart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    color: #999;
+    text-align: center;
+
+    mat-icon {
+      font-size: 3rem;
+      width: 3rem;
+      height: 3rem;
+      margin-bottom: 1rem;
+      color: #ddd;
+    }
+
+    p {
+      margin: 0;
+
+      &.hint {
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}
+
+// Scrollbar Styling
+.cart-items::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cart-items::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.cart-items::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+
+  &:hover {
+    background: #888;
+  }
+}

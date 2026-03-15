@@ -1,0 +1,70 @@
+.recipe-list-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    h1 {
+      margin: 0;
+      font-size: 2.5rem;
+    }
+  }
+
+  .search-filter-section {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+
+    .search-field {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .filter-field {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    button {
+      height: 56px;
+    }
+  }
+
+  .recipes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+
+    .no-recipes {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #999;
+
+      mat-icon {
+        font-size: 4rem;
+        width: 4rem;
+        height: 4rem;
+        margin-bottom: 1rem;
+        color: #ddd;
+      }
+
+      p {
+        margin: 0;
+        font-size: 1.1rem;
+
+        &.hint {
+          font-size: 0.9rem;
+          margin-top: 0.5rem;
+        }
+      }
+    }
+  }
+}

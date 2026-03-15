@@ -1,0 +1,57 @@
+.app-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  min-height: 64px;
+  width: 100%;
+  box-sizing: border-box;
+
+  .app-title {
+    font-size: 1.3rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+.spacer {
+        flex: 1 1 auto;
+    }
+
+  .toolbar-buttons {
+    display: flex;
+    flex-shrink: 0;
+    gap: 0;
+  }
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    margin-right: 5rem;
+    margin-left: 2rem;
+
+    span {
+      display: inline-block;
+      margin-left: 0.5rem;
+
+      @media (max-width: 600px) {
+        display: none;
+      }
+    }
+
+    &.active {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  }
+}
+
+.app-content {
+  margin-top: 64px;
+  min-height: calc(100vh - 64px);
+  background-color: #fafafa;
+  overflow-x: hidden;
+}
