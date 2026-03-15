@@ -1,12 +1,16 @@
 <mat-toolbar color="primary" class="app-toolbar">
   <span class="app-title" routerLink="/recipes" style="cursor: pointer;">🍳 Food Helper</span>
-  <button mat-icon-button routerLink="/r">
+  <button mat-button routerLink="/r" class="nav-btn">
     <mat-icon>home</mat-icon>
-    <span>Home</span>
+    <span class="nav-label">Home</span>
   </button>
-  <button mat-icon-button routerLink="/recipes">
+  <button mat-button routerLink="/recipes" class="nav-btn">
     <mat-icon>restaurant</mat-icon>
-    <span>Recipes</span>
+    <span class="nav-label">Recipes</span>
+  </button>
+  <button mat-button routerLink="/shopping-list" class="nav-btn">
+    <mat-icon>shopping_cart</mat-icon>
+    <span class="nav-label">Shopping List</span>
   </button>
   <span class="spacer"></span>
   <button mat-icon-button class="dark-mode-btn"

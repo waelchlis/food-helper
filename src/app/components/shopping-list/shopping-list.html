@@ -1,0 +1,74 @@
+<div class="shopping-list-container">
+  <div class="header-section">
+    <h1>Shopping List</h1>
+    @if (shoppingListService.allItems().length > 0) {
+      <button mat-stroked-button color="warn" (click)="clearAll()">
+        <mat-icon>delete_sweep</mat-icon>
+        Clear All
+      </button>
+    }
+  </div>
+
+  <!-- Add Item Form -->
+  <mat-card class="add-item-card">
+    <mat-card-header>
+      <mat-card-title>Add Item</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="add-item-form">
+        <mat-form-field appearance="outline" class="name-field">
+          <mat-label>Item name</mat-label>
+          <input matInput [(ngModel)]="newName" placeholder="e.g. Tomatoes" (keyup.enter)="addItem()">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="amount-field">
+          <mat-label>Amount</mat-label>
+          <input matInput type="number" [(ngModel)]="newAmount" min="0.01" step="0.25">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="unit-field">
+          <mat-label>Unit</mat-label>
+          <input matInput [(ngModel)]="newUnit" placeholder="e.g. grams" (keyup.enter)="addItem()">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="notes-field">
+          <mat-label>Notes</mat-label>
+          <input matInput [(ngModel)]="newNotes" placeholder="Optional notes" (keyup.enter)="addItem()">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="addItem()" [disabled]="!newName.trim() || !newUnit.trim()">
+          <mat-icon>add</mat-icon>
+          Add
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Shopping List Items -->
+  @if (shoppingListService.allItems().length > 0) {
+    <div class="items-list">
+      @for (item of shoppingListService.allItems(); track item.id) {
+        <mat-card class="item-card">
+          <div class="item-row">
+            <span class="item-name">{{ item.name }}</span>
+            <div class="item-quantity">
+              <mat-form-field appearance="outline" class="inline-amount">
+                <input matInput type="number" [ngModel]="item.amount" (ngModelChange)="updateQuantity(item, $event)" min="0.01" step="0.25">
+              </mat-form-field>
+              <span class="item-unit">{{ item.unit }}</span>
+            </div>
+            <mat-form-field appearance="outline" class="notes-input">
+              <mat-label>Notes</mat-label>
+              <input matInput [ngModel]="item.notes" (ngModelChange)="updateNotes(item, $event)" placeholder="Add notes...">
+            </mat-form-field>
+            <button mat-icon-button color="warn" (click)="removeItem(item.id)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </mat-card>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <mat-icon>shopping_cart</mat-icon>
+      <p>Your shopping list is empty</p>
+      <p class="hint">Add items manually or from a recipe</p>
+    </div>
+  }
+</div>

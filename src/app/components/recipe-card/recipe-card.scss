@@ -20,8 +20,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #ebe8e3;
-    color: #bbb;
+    background-color: #e4ddf0;
+    color: #b39ddb;
 
     mat-icon {
       font-size: 3rem;
@@ -32,7 +32,7 @@
 
   mat-card-header {
     padding: 1rem;
-    border-bottom: 1px solid #e5e2dd;
+    border-bottom: 1px solid #ddd6ed;
   }
 
   mat-card-title {
@@ -62,7 +62,7 @@
         font-size: 0.9rem;
 
         mat-icon {
-          color: #1976d2;
+          color: #7c3aed;
         }
       }
     }
@@ -70,7 +70,7 @@
 
   mat-card-actions {
     padding: 1rem;
-    border-top: 1px solid #e5e2dd;
+    border-top: 1px solid #ddd6ed;
     display: flex;
     gap: 0.5rem;
 

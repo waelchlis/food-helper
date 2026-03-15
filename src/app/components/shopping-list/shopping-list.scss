@@ -1,0 +1,122 @@
+.shopping-list-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    h1 {
+      margin: 0;
+      font-size: 2.5rem;
+    }
+  }
+
+  .add-item-card {
+    margin-bottom: 2rem;
+
+    mat-card-content {
+      padding: 1.5rem;
+    }
+
+    .add-item-form {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: flex-end;
+
+      .name-field {
+        flex: 2;
+        min-width: 180px;
+      }
+
+      .amount-field {
+        flex: 0.7;
+        min-width: 100px;
+      }
+
+      .unit-field {
+        flex: 1;
+        min-width: 120px;
+      }
+
+      .notes-field {
+        flex: 2;
+        min-width: 180px;
+      }
+
+      button {
+        height: 56px;
+      }
+    }
+  }
+
+  .items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .item-card {
+    .item-row {
+      display: grid;
+      grid-template-columns: 160px auto 1fr auto;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.5rem 1rem;
+
+      .item-name {
+        font-weight: 550;
+        font-size: 1.05rem;
+        word-break: break-word;
+      }
+
+      .item-quantity {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        .inline-amount {
+          width: 100px;
+        }
+
+        .item-unit {
+          color: #666;
+          font-size: 0.9rem;
+          white-space: nowrap;
+        }
+      }
+
+      .notes-input {
+        width: 100%;
+      }
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: #999;
+
+    mat-icon {
+      font-size: 4rem;
+      width: 4rem;
+      height: 4rem;
+      margin-bottom: 1rem;
+      color: #c4b5fd;
+    }
+
+    p {
+      margin: 0;
+      font-size: 1.1rem;
+
+      &.hint {
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+      }
+    }
+  }
+}

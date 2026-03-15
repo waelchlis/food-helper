@@ -6,14 +6,22 @@
   z-index: 100;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
+  align-items: center;
   min-height: 64px;
   width: 100%;
   box-sizing: border-box;
+  padding: 0 1rem;
 
   .app-title {
-    font-size: 1.3rem;
-    font-weight: 500;
+    font-size: 1.4rem;
+    font-weight: 600;
     cursor: pointer;
+    margin-right: 1rem;
+    white-space: nowrap;
+
+    @media (max-width: 600px) {
+      display: none;
+    }
   }
 
   .spacer {
@@ -21,29 +29,34 @@
   }
 
   .dark-mode-btn {
-    margin-right: 1rem;
-    margin-left: 0;
-  }
-
-  .toolbar-buttons {
-    display: flex;
+    margin-left: 0.5rem;
     flex-shrink: 0;
-    gap: 0;
+
+    mat-icon {
+      font-size: 1.4rem;
+      width: 1.4rem;
+      height: 1.4rem;
+    }
   }
 
-  button {
+  .nav-btn {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
     flex-shrink: 0;
-    margin-right: 5rem;
-    margin-left: 2rem;
+    margin-left: 0.25rem;
+    padding: 0 0.75rem;
+    height: 48px;
+    font-size: 1rem;
 
-    span {
-      display: inline-block;
-      margin-left: 0.5rem;
+    mat-icon {
+      font-size: 1.3rem;
+      width: 1.3rem;
+      height: 1.3rem;
+    }
 
-      @media (max-width: 600px) {
+    .nav-label {
+      @media (max-width: 480px) {
         display: none;
       }
     }
@@ -57,7 +70,7 @@
 .app-content {
   margin-top: 64px;
   min-height: calc(100vh - 64px);
-  background-color: #f7f5f2;
+  background-color: #f5f3fa;
   overflow-x: hidden;
   transition: background-color 0.3s ease;
 }

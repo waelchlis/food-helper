@@ -10,8 +10,8 @@ html {
   @include mat.theme(
     (
       color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
+        primary: mat.$violet-palette,
+        tertiary: mat.$magenta-palette,
       ),
       typography: Roboto,
       density: 0,
@@ -28,7 +28,7 @@ body {
   // Set a default background, font and text colors for the application using
   // Angular Material's system-level CSS variables. Learn more about these
   // variables at https://material.angular.dev/guide/system-variables
-  background-color: #f7f5f2;
+  background-color: #f5f3fa;
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
 
@@ -42,34 +42,34 @@ body {
 
 html.dark-mode body {
   color-scheme: dark;
-  background-color: #252525;
+  background-color: #1e1a2e;
 }
 
 html.dark-mode .app-content {
-  background-color: #252525;
+  background-color: #1e1a2e;
 }
 
 html.dark-mode .recipe-detail-container {
   .recipe-header .no-image {
-    background-color: #3a3a3a !important;
-    color: #777 !important;
+    background-color: #352e4a !important;
+    color: #7c6b9e !important;
   }
 
   .recipe-info .meta-section .meta-item {
-    background-color: #333333 !important;
-    border-color: #4a4a4a !important;
+    background-color: #2d2640 !important;
+    border-color: #3d3554 !important;
 
-    mat-icon { color: #4fc3f7 !important; }
+    mat-icon { color: #c084fc !important; }
   }
 
   .recipe-content .section-card {
-    mat-card-header { border-bottom-color: #4a4a4a !important; }
+    mat-card-header { border-bottom-color: #3d3554 !important; }
 
     mat-card-content .ingredients-list .ingredient-item {
-      background-color: #333333 !important;
+      background-color: #2d2640 !important;
 
-      .amount { color: #4fc3f7 !important; }
-      .unit { color: #aaa !important; }
+      .amount { color: #c084fc !important; }
+      .unit { color: #a78bca !important; }
     }
   }
 }
@@ -77,23 +77,45 @@ html.dark-mode .recipe-detail-container {
 
 html.dark-mode .recipe-card {
   .no-image {
-    background-color: #3a3a3a !important;
-    color: #777 !important;
+    background-color: #352e4a !important;
+    color: #7c6b9e !important;
   }
 
   mat-card-header {
-    border-bottom-color: #4a4a4a !important;
+    border-bottom-color: #3d3554 !important;
   }
 
   mat-card-actions {
-    border-top-color: #4a4a4a !important;
+    border-top-color: #3d3554 !important;
   }
 
   mat-card-content .recipe-meta .meta-item mat-icon {
-    color: #4fc3f7 !important;
+    color: #c084fc !important;
   }
 }
 
 html.dark-mode .recipe-list-container .recipes-grid .no-recipes mat-icon {
-  color: #444 !important;
+  color: #4a3f6b !important;
+}
+
+html.dark-mode .shopping-list-container .empty-state mat-icon {
+  color: #4a3f6b !important;
+}
+
+html.dark-mode .shopping-list-container .item-card .item-row .item-info .item-quantity .item-unit {
+  color: #a78bca !important;
+}
+
+/* Snackbar success style */
+.snack-success {
+  --mdc-snackbar-container-color: #4a3580;
+  --mdc-snackbar-supporting-text-color: #fff;
+  --mat-snack-bar-button-color: #c084fc;
+}
+
+/* Dark mode dialog overrides */
+html.dark-mode .mat-mdc-dialog-container {
+  --mdc-dialog-container-color: #2d2640;
+  --mdc-dialog-supporting-text-color: #e0d9f5;
+  --mdc-dialog-subhead-color: #e0d9f5;
 }

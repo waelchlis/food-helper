@@ -105,13 +105,17 @@
 
     <!-- Action Buttons -->
     <div class="action-buttons">
+      <button mat-raised-button routerLink="/recipes">
+        <mat-icon>arrow_back</mat-icon>
+        Back to Recipes
+      </button>
       <button mat-raised-button color="primary" [routerLink]="['/recipe', recipe()!.id, 'edit']">
         <mat-icon>edit</mat-icon>
         Edit Recipe
       </button>
-      <button mat-stroked-button routerLink="/recipes">
-        <mat-icon>arrow_back</mat-icon>
-        Back to Recipes
+      <button mat-raised-button color="accent" (click)="addToShoppingList()">
+        <mat-icon>shopping_cart</mat-icon>
+        Add to Shopping List
       </button>
     </div>
   </div>
