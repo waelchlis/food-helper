@@ -74,26 +74,3 @@ html.dark-mode .recipe-detail-container {
   }
 }
 /* You can add global styles to this file, and also import other style files */
-
-html.dark-mode .recipe-card {
-  .no-image {
-    background-color: #3a3a3a !important;
-    color: #777 !important;
-  }
-
-  mat-card-header {
-    border-bottom-color: #4a4a4a !important;
-  }
-
-  mat-card-actions {
-    border-top-color: #4a4a4a !important;
-  }
-
-  mat-card-content .recipe-meta .meta-item mat-icon {
-    color: #4fc3f7 !important;
-  }
-}
-
-html.dark-mode .recipe-list-container .recipes-grid .no-recipes mat-icon {
-  color: #444 !important;
-}

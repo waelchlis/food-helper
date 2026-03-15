@@ -16,9 +16,14 @@
     cursor: pointer;
   }
 
-.spacer {
-        flex: 1 1 auto;
-    }
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  .dark-mode-btn {
+    margin-right: 1rem;
+    margin-left: 0;
+  }
 
   .toolbar-buttons {
     display: flex;
@@ -52,6 +57,7 @@
 .app-content {
   margin-top: 64px;
   min-height: calc(100vh - 64px);
-  background-color: #fafafa;
+  background-color: #f7f5f2;
   overflow-x: hidden;
+  transition: background-color 0.3s ease;
 }

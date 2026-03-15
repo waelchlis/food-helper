@@ -8,6 +8,12 @@
     <mat-icon>restaurant</mat-icon>
     <span>Recipes</span>
   </button>
+  <span class="spacer"></span>
+  <button mat-icon-button class="dark-mode-btn"
+    [matTooltip]="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+    (click)="toggleDarkMode()">
+    <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+  </button>
 </mat-toolbar>
 
 <div class="app-content">

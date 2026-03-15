@@ -20,8 +20,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f5f5f5;
-    color: #ccc;
+    background-color: #ebe8e3;
+    color: #bbb;
 
     mat-icon {
       font-size: 3rem;
@@ -32,7 +32,7 @@
 
   mat-card-header {
     padding: 1rem;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #e5e2dd;
   }
 
   mat-card-title {
@@ -70,7 +70,7 @@
 
   mat-card-actions {
     padding: 1rem;
-    border-top: 1px solid #f0f0f0;
+    border-top: 1px solid #e5e2dd;
     display: flex;
     gap: 0.5rem;
 
