@@ -1,130 +1,99 @@
-# Angular Material Sample App
+# Food Helper Monorepo
 
-This project is an Angular application with Google Material Design library pre-installed and a sample page showcasing various Material components.
+This repository is split into two apps:
 
-## Generated with Angular CLI version 21.2.1
+- `frontend/`: Angular web app
+- `backend/`: .NET 10 Web API
 
-### What's Included
-- **Angular 21.2.1** - Latest version of the Angular framework
-- **Angular Material 21.2.1** - Pre-configured Material Design components
-- **Sample Components:**
-  - Material Toolbar
-  - Material Cards (3 variants)
-  - Material Buttons (multiple styles)
-  - Material Form Fields (input and select)
-  - Material Data Table
-  - Material Lists
-  - Material Icons
-  - Material Divider
+## Prerequisites
 
-## Development server
+- Node.js + npm
+- .NET SDK 10 (project-local SDK is available at `./.dotnet/dotnet`)
+- Firebase project with Firestore enabled
+- Google Cloud OAuth client (Web application)
 
-To start a local development server, run:
+## Frontend setup
+
+1. Configure Google OAuth values in `frontend/src/environments/environment.ts`.
+2. Install dependencies:
 
 ```bash
-ng serve
+cd frontend
+npm install
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Sample Page
-
-The application displays a sample page at the root path with the following Material components:
-- Header toolbar with title
-- Welcome section with descriptive text
-- 3-column card grid with Material cards
-- Button showcase with various button styles and FAB buttons
-- Form elements (text input and select dropdown)
-- Data table with sample user data
-- Material list with icons
-
-## Customization
-
-### Adding New Components
-To generate new components, run:
+3. Start the Angular dev server:
 
 ```bash
-ng generate component component-name
+npm start
 ```
 
-### Building for Production
-To build the project for production, run:
+The app runs on `http://localhost:4200`.
+
+## Backend setup
+
+1. Update placeholders in:
+- `backend/FoodHelper.Api/appsettings.Development.json`
+- `backend/FoodHelper.Api/appsettings.json`
+
+2. Set Firestore credentials:
+- Use `Firebase:GoogleApplicationCredentialsPath` in appsettings, or
+- set `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
+
+3. Run backend:
 
 ```bash
-npm run build
+./.dotnet/dotnet run --project backend/FoodHelper.Api
 ```
 
-The build artifacts will be stored in the `dist/` directory.
+The API runs on `http://localhost:5000`.
 
-## Project Structure
+Swagger UI is available in development at:
 
-```
-src/
-├── app/
-│   ├── app.ts                 # Root component
-│   ├── app.html               # Root template
-│   ├── app.scss               # Root styles
-│   ├── sample-page/           # Sample page component
-│   │   ├── sample-page.ts     # Component logic
-│   │   ├── sample-page.html   # Component template
-│   │   └── sample-page.scss   # Component styles
-│   └── app.routes.ts          # Routing configuration
-├── styles.scss                # Global styles
-└── main.ts                    # Application entry point
-```
+- `http://localhost:5000/swagger`
 
-## Material Components Used
+## Start both apps with one command
 
-- **MatToolbarModule** - Header toolbar
-- **MatCardModule** - Content cards
-- **MatButtonModule** - Interactive buttons
-- **MatFormFieldModule** - Form field containers
-- **MatInputModule** - Text input fields
-- **MatSelectModule** - Dropdown selection
-- **MatTableModule** - Data tables
-- **MatListModule** - List component
-- **MatIconModule** - Material icons
-- **MatDividerModule** - Visual divider
-
-## Further Help
-
-For more information on Angular CLI, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page or explore the [Angular official documentation](https://angular.dev)
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+From the repository root, run:
 
 ```bash
-ng generate --help
+./scripts/dev.sh
 ```
 
-## Building
+This starts:
 
-To build the project run:
+- frontend on `http://localhost:4200`
+- backend on `http://localhost:5000`
 
-```bash
-ng build
-```
+You can also run the VS Code task `dev: start all`.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Implemented API endpoints
 
-## Running unit tests
+### Recipes
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+- `GET /api/recipes`
+- `GET /api/recipes/{id}`
+- `POST /api/recipes` (authenticated)
+- `PUT /api/recipes/{id}` (authenticated)
+- `DELETE /api/recipes/{id}` (authenticated)
 
-```bash
-ng test
-```
+### Shopping list
 
-## Running end-to-end tests
+- `GET /api/shopping-list/items`
+- `POST /api/shopping-list/items`
+- `PUT /api/shopping-list/items/{itemId}`
+- `DELETE /api/shopping-list/items/{itemId}`
+- `DELETE /api/shopping-list/items`
 
-For end-to-end (e2e) testing, run:
+Anonymous requests to shopping list endpoints must include `X-Session-Id`.
 
-```bash
-ng e2e
-```
+## Authentication
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+- Frontend uses Google OIDC Authorization Code flow with PKCE.
+- Backend validates bearer JWT tokens from Google.
 
-## Additional Resources
+## Notes
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- If Firestore cannot initialize, backend falls back to in-memory storage.
+- Recipe creation/edit/delete UI is shown only to authenticated users.
+- Shopping list is persisted per browser session for anonymous users and per user (local storage key scoped to Google `sub`) when signed in.

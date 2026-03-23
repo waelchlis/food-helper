@@ -1,0 +1,6 @@
+@FoodHelper.Api_HostAddress = http://localhost:5208
+
+GET {{FoodHelper.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

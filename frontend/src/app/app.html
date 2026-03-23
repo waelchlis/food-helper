@@ -1,0 +1,48 @@
+<mat-toolbar color="primary" class="app-toolbar">
+  <span class="app-title" routerLink="/recipes" style="cursor: pointer;">🍳 Food Helper</span>
+  <button mat-button routerLink="/r" class="nav-btn">
+    <mat-icon>home</mat-icon>
+    <span class="nav-label">Home</span>
+  </button>
+  <button mat-button routerLink="/recipes" class="nav-btn">
+    <mat-icon>restaurant</mat-icon>
+    <span class="nav-label">Recipes</span>
+  </button>
+  <button mat-button routerLink="/shopping-list" class="nav-btn">
+    <mat-icon>shopping_cart</mat-icon>
+    <span class="nav-label">Shopping List</span>
+  </button>
+  <span class="spacer"></span>
+  @if (authService.isAuthenticated()) {
+    <span class="user-greeting">Hi, {{ authService.userDisplayName() }}!</span>
+    <button mat-stroked-button color="accent" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Logout
+    </button>
+  } @else {
+    @if (authService.isConfigured()) {
+      <span class="login-button-shell">
+        <button mat-stroked-button color="accent" class="login-button-visual" aria-hidden="true" tabindex="-1">
+          <mat-icon>login</mat-icon>
+          Login
+        </button>
+        <span #googleSignInButton class="google-signin-overlay" aria-label="Login"></span>
+      </span>
+    } @else {
+      <button mat-stroked-button color="accent" disabled>
+        <mat-icon>login</mat-icon>
+        Login unavailable
+      </button>
+    }
+  }
+  <button mat-icon-button class="dark-mode-btn"
+    [matTooltip]="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+    (click)="toggleDarkMode()">
+    <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+  </button>
+</mat-toolbar>
+
+<div class="app-content">
+  <router-outlet></router-outlet>
+</div>
+
