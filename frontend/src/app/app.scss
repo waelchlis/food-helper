@@ -1,3 +1,23 @@
+$mobile-breakpoint: 768px;
+
+.sidenav-container {
+  height: 100%;
+}
+
+.mobile-sidenav {
+  width: 260px;
+
+  mat-nav-list {
+    padding-top: 0.5rem;
+
+    a {
+      mat-icon {
+        margin-right: 0.75rem;
+      }
+    }
+  }
+}
+
 .app-toolbar {
   position: fixed;
   top: 0;
@@ -11,6 +31,15 @@
   width: 100%;
   box-sizing: border-box;
   padding: 0 1rem;
+
+  .menu-btn {
+    display: none;
+    flex-shrink: 0;
+
+    @media (max-width: $mobile-breakpoint) {
+      display: inline-flex;
+    }
+  }
 
   .app-title {
     font-size: 1.4rem;
@@ -44,6 +73,10 @@
     font-size: 0.95rem;
     font-weight: 500;
     white-space: nowrap;
+
+    @media (max-width: 600px) {
+      display: none;
+    }
   }
 
   .login-button-shell {
@@ -67,7 +100,7 @@
     border-radius: 999px;
   }
 
-  .nav-btn {
+  .desktop-nav {
     display: flex;
     align-items: center;
     gap: 0.4rem;
@@ -84,7 +117,7 @@
     }
 
     .nav-label {
-      @media (max-width: 480px) {
+      @media (max-width: 900px) {
         display: none;
       }
     }
@@ -92,10 +125,8 @@
     &.active {
       background-color: rgba(255, 255, 255, 0.2);
     }
-  }
 
-  @media (max-width: 600px) {
-    .user-greeting {
+    @media (max-width: $mobile-breakpoint) {
       display: none;
     }
   }

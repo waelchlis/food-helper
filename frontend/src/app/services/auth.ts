@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { firstValueFrom, ReplaySubject } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 type GoogleIdConfiguration = {
@@ -53,6 +54,7 @@ type GoogleIdentityClaims = {
 };
 
 const tokenStorageKey = 'food-helper.google-id-token';
+const adminStorageKey = 'food-helper.is-admin';
 let googleIdentityScriptPromise: Promise<GoogleAccountsId> | null = null;
 
 @Injectable({ providedIn: 'root' })
@@ -63,6 +65,7 @@ export class AuthService {
   private readonly admin = signal(false);
   private readonly idToken = signal('');
   private readonly identityClaims = signal<GoogleIdentityClaims | null>(null);
+  private readonly adminStatusResolved$ = new ReplaySubject<void>(1);
   private googleAccountsId: GoogleAccountsId | null = null;
   private readonly hasGoogleClientId =
     environment.googleClientId.trim().length > 0 &&
@@ -76,6 +79,7 @@ export class AuthService {
     const claims = this.identityClaims();
     return claims?.given_name?.trim() || claims?.name?.trim() || claims?.email?.trim() || 'there';
   });
+  readonly userEmail = computed(() => this.identityClaims()?.email ?? null);
 
   constructor() {
     this.restoreStoredSession();
@@ -163,7 +167,8 @@ export class AuthService {
     this.idToken.set(storedToken);
     this.identityClaims.set(claims);
     this.authenticated.set(true);
-    this.fetchAdminStatus();
+    this.admin.set(sessionStorage.getItem(adminStorageKey) === 'true');
+    queueMicrotask(() => this.fetchAdminStatus());
   }
 
   private persistSession(token: string): void {
@@ -180,15 +185,31 @@ export class AuthService {
     this.fetchAdminStatus();
   }
 
+  waitForAdminStatus(): Promise<void> {
+    if (!this.authenticated()) {
+      return Promise.resolve();
+    }
+    return firstValueFrom(this.adminStatusResolved$).then(() => {});
+  }
+
   private fetchAdminStatus(): void {
     this.http.get<{ isAdmin: boolean }>(`${environment.apiBaseUrl}/auth/me`).subscribe({
-      next: (res) => this.admin.set(res.isAdmin),
-      error: () => this.admin.set(false),
+      next: (res) => {
+        this.admin.set(res.isAdmin);
+        sessionStorage.setItem(adminStorageKey, String(res.isAdmin));
+        this.adminStatusResolved$.next();
+      },
+      error: () => {
+        this.admin.set(false);
+        sessionStorage.removeItem(adminStorageKey);
+        this.adminStatusResolved$.next();
+      },
     });
   }
 
   private clearSession(): void {
     sessionStorage.removeItem(tokenStorageKey);
+    sessionStorage.removeItem(adminStorageKey);
     this.idToken.set('');
     this.identityClaims.set(null);
     this.authenticated.set(false);

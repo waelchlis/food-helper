@@ -98,3 +98,6 @@ caddy_config/
 logs/
 .DS_Store
 Thumbs.db
+
+# ── Credentials Files ───────────────────────────────────────────────
+*firebase*.json

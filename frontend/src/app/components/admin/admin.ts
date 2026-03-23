@@ -67,7 +67,7 @@ export class AdminComponent implements OnInit {
   }
 
   isSelf(admin: Admin): boolean {
-    const subject = this.authService.getUserSubject();
-    return admin.isLinked && !!subject;
+    const email = this.authService.userEmail();
+    return !!email && admin.email.toLowerCase() === email.toLowerCase();
   }
 }
