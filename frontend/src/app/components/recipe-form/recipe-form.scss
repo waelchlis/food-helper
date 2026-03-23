@@ -165,4 +165,69 @@
       min-width: 150px;
     }
   }
+
+  .image-upload-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+
+    .upload-divider {
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    .image-preview {
+      position: relative;
+      display: inline-block;
+
+      img {
+        max-height: 200px;
+        max-width: 100%;
+        border-radius: 8px;
+        object-fit: cover;
+      }
+
+      button {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+      }
+    }
+  }
+
+  .word-list-hint {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 0.75rem;
+  }
+
+  .word-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+
+    .word-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.15rem;
+      padding: 0.25rem 0.6rem;
+      background-color: #ede8f5;
+      border-radius: 16px;
+      font-size: 0.85rem;
+
+      .word-delete {
+        width: 20px;
+        height: 20px;
+        line-height: 20px;
+
+        mat-icon {
+          font-size: 14px;
+          width: 14px;
+          height: 14px;
+        }
+      }
+    }
+  }
 }

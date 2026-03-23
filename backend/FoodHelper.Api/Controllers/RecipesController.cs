@@ -3,12 +3,13 @@ using FoodHelper.Api.Models;
 using FoodHelper.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace FoodHelper.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class RecipesController(IRecipeStore recipes) : ControllerBase
+public sealed class RecipesController(IRecipeStore recipes, IImageStore imageStore) : ControllerBase
 {
     [HttpGet]
     [AllowAnonymous]
@@ -31,7 +32,7 @@ public sealed class RecipesController(IRecipeStore recipes) : ControllerBase
     }
 
     [HttpPost]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<Recipe>> Create([FromBody] UpsertRecipeRequest request, CancellationToken cancellationToken)
     {
         var now = DateTime.UtcNow;
@@ -46,6 +47,7 @@ public sealed class RecipesController(IRecipeStore recipes) : ControllerBase
             Ingredients = request.Ingredients,
             Instructions = request.Instructions,
             Image = request.Image,
+            CreatorName = ResolveCreatorName(),
             CreatedAt = now,
             UpdatedAt = now,
         };
@@ -55,7 +57,7 @@ public sealed class RecipesController(IRecipeStore recipes) : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<Recipe>> Update(string id, [FromBody] UpsertRecipeRequest request, CancellationToken cancellationToken)
     {
         var existing = await recipes.GetByIdAsync(id, cancellationToken);
@@ -75,6 +77,7 @@ public sealed class RecipesController(IRecipeStore recipes) : ControllerBase
             Ingredients = request.Ingredients,
             Instructions = request.Instructions,
             Image = request.Image,
+            CreatorName = existing.CreatorName,
             CreatedAt = existing.CreatedAt,
             UpdatedAt = DateTime.UtcNow,
         };
@@ -83,7 +86,7 @@ public sealed class RecipesController(IRecipeStore recipes) : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken)
     {
         var deleted = await recipes.DeleteAsync(id, cancellationToken);
@@ -93,5 +96,42 @@ public sealed class RecipesController(IRecipeStore recipes) : ControllerBase
         }
 
         return NoContent();
+    }
+
+    [HttpPost("{id}/image")]
+    [Authorize(Policy = "AdminOnly")]
+    [RequestSizeLimit(5 * 1024 * 1024)]
+    public async Task<ActionResult<Recipe>> UploadImage(string id, IFormFile file, CancellationToken cancellationToken)
+    {
+        if (file.Length == 0 || !file.ContentType.StartsWith("image/"))
+        {
+            return BadRequest(new { error = "A valid image file is required." });
+        }
+
+        var recipe = await recipes.GetByIdAsync(id, cancellationToken);
+        if (recipe is null)
+        {
+            return NotFound();
+        }
+
+        using var stream = file.OpenReadStream();
+        recipe.Image = await imageStore.UploadAsync(stream, file.ContentType, id, cancellationToken);
+        recipe.UpdatedAt = DateTime.UtcNow;
+
+        return Ok(await recipes.UpsertAsync(recipe, cancellationToken));
+    }
+
+    private string ResolveCreatorName()
+    {
+        var name = User.FindFirstValue("name");
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            return name;
+        }
+
+        var givenName = User.FindFirstValue(ClaimTypes.GivenName) ?? "";
+        var familyName = User.FindFirstValue(ClaimTypes.Surname) ?? "";
+        var fullName = $"{givenName} {familyName}".Trim();
+        return fullName.Length > 0 ? fullName : "Unknown";
     }
 }

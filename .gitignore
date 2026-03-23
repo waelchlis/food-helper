@@ -52,6 +52,7 @@ TestResults/
 
 # ASP.NET Core
 appsettings.Development.json
+appsettings.Production.json
 appsettings.*.local.json
 
 # Secrets & sensitive config
@@ -83,6 +84,13 @@ secrets.json
 !.vscode/extensions.json
 !.vscode/mcp.json
 .history/*
+
+# ── Docker / deployment ───────────────────────────────────
+
+.env
+credentials.json
+caddy_data/
+caddy_config/
 
 # ── System ────────────────────────────────────────────────
 

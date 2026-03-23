@@ -12,6 +12,12 @@
     <mat-icon>shopping_cart</mat-icon>
     <span class="nav-label">Shopping List</span>
   </button>
+  @if (authService.isAdmin()) {
+    <button mat-button routerLink="/admin" class="nav-btn">
+      <mat-icon>admin_panel_settings</mat-icon>
+      <span class="nav-label">Admin</span>
+    </button>
+  }
   <span class="spacer"></span>
   @if (authService.isAuthenticated()) {
     <span class="user-greeting">Hi, {{ authService.userDisplayName() }}!</span>

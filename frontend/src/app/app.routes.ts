@@ -3,7 +3,9 @@ import { RecipeListComponent } from './components/recipe-list/recipe-list';
 import { RecipeDetailComponent } from './components/recipe-detail/recipe-detail';
 import { RecipeFormComponent } from './components/recipe-form/recipe-form';
 import { ShoppingListComponent } from './components/shopping-list/shopping-list';
+import { AdminComponent } from './components/admin/admin';
 import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -36,6 +38,11 @@ export const routes: Routes = [
   {
     path: 'shopping-list',
     component: ShoppingListComponent,
+  },
+  {
+    path: 'admin',
+    component: AdminComponent,
+    canActivate: [adminGuard],
   },
   {
     path: '**',

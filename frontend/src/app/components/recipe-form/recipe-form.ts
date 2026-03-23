@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -8,8 +8,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { Recipe, RecipeService, Ingredient } from '../../services/recipe';
 import { AuthService } from '../../services/auth';
+import { IngredientWordService } from '../../services/ingredient-word';
 
 @Component({
   selector: 'app-recipe-form',
@@ -24,6 +26,7 @@ import { AuthService } from '../../services/auth';
     MatFormFieldModule,
     MatInputModule,
     MatDividerModule,
+    MatAutocompleteModule,
   ],
   templateUrl: './recipe-form.html',
   styleUrl: './recipe-form.scss',
@@ -39,15 +42,43 @@ export class RecipeFormComponent implements OnInit {
     ingredients: [],
     instructions: [],
   });
+  selectedImageFile: File | null = null;
+  imagePreview = signal<string | null>(null);
+  ingredientFilters = signal<Record<number, string>>({});
+
+  filteredIngredientWords = computed(() => {
+    const words = this.ingredientWordService.allWords();
+    const filters = this.ingredientFilters();
+    const result: Record<number, string[]> = {};
+    const indices = Object.keys(filters);
+    for (const idx of indices) {
+      const filter = (filters[+idx] || '').toLowerCase();
+      result[+idx] = filter
+        ? words.map(w => w.name).filter(n => n.toLowerCase().includes(filter))
+        : words.map(w => w.name);
+    }
+    return result;
+  });
+
+  usedIngredientNames = computed(() => {
+    const names = new Set<string>();
+    this.recipeService.getRecipes().forEach(r => {
+      r.ingredients.forEach(i => names.add(i.name.toLowerCase()));
+    });
+    return names;
+  });
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private recipeService: RecipeService,
-    private authService: AuthService,
+    protected authService: AuthService,
+    protected ingredientWordService: IngredientWordService,
   ) {}
 
   ngOnInit(): void {
+    this.ingredientWordService.loadAll();
+
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/recipes']);
       return;
@@ -169,6 +200,30 @@ export class RecipeFormComponent implements OnInit {
       ...current,
       ingredients: updated,
     });
+
+    if (field === 'name') {
+      this.ingredientFilters.set({ ...this.ingredientFilters(), [index]: value as string });
+    }
+  }
+
+  onIngredientInputFocus(index: number): void {
+    const current = this.recipe().ingredients?.[index]?.name || '';
+    this.ingredientFilters.set({ ...this.ingredientFilters(), [index]: current });
+  }
+
+  onIngredientNameInput(index: number, value: string): void {
+    this.ingredientFilters.set({ ...this.ingredientFilters(), [index]: value });
+  }
+
+  onIngredientNameEnter(index: number): void {
+    const name = this.recipe().ingredients?.[index]?.name?.trim();
+    if (!name) return;
+    const exists = this.ingredientWordService.allWords().some(
+      w => w.name.toLowerCase() === name.toLowerCase()
+    );
+    if (!exists) {
+      this.ingredientWordService.add(name);
+    }
   }
 
   updateInstruction(index: number, value: string): void {
@@ -180,6 +235,31 @@ export class RecipeFormComponent implements OnInit {
       ...current,
       instructions: updated,
     });
+  }
+
+  onImageFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be smaller than 5 MB');
+      return;
+    }
+
+    this.selectedImageFile = file;
+    const reader = new FileReader();
+    reader.onload = () => this.imagePreview.set(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  removeSelectedImage(): void {
+    this.selectedImageFile = null;
+    this.imagePreview.set(null);
   }
 
   saveRecipe(): void {
@@ -217,12 +297,26 @@ export class RecipeFormComponent implements OnInit {
     if (this.isEditMode() && recipe.id) {
       this.recipeService.updateRecipe(recipe.id, { ...recipeData }).subscribe(updatedRecipe => {
         if (updatedRecipe) {
-          this.router.navigate(['/recipe', updatedRecipe.id]);
+          if (this.selectedImageFile) {
+            this.recipeService.uploadImage(updatedRecipe.id, this.selectedImageFile).subscribe({
+              next: () => this.router.navigate(['/recipe', updatedRecipe.id]),
+              error: () => this.router.navigate(['/recipe', updatedRecipe.id]),
+            });
+          } else {
+            this.router.navigate(['/recipe', updatedRecipe.id]);
+          }
         }
       });
     } else {
       this.recipeService.createRecipe(recipeData).subscribe(newRecipe => {
-        this.router.navigate(['/recipe', newRecipe.id]);
+        if (this.selectedImageFile) {
+          this.recipeService.uploadImage(newRecipe.id, this.selectedImageFile).subscribe({
+            next: () => this.router.navigate(['/recipe', newRecipe.id]),
+            error: () => this.router.navigate(['/recipe', newRecipe.id]),
+          });
+        } else {
+          this.router.navigate(['/recipe', newRecipe.id]);
+        }
       });
     }
   }

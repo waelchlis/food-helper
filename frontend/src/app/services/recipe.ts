@@ -20,6 +20,7 @@ export interface Recipe {
   ingredients: Ingredient[];
   instructions: string[];
   image?: string;
+  creatorName?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -114,6 +115,15 @@ export class RecipeService {
       map(() => true),
       tap(() => this.recipes.set(this.recipes().filter(r => r.id !== id))),
       catchError(() => of(false))
+    );
+  }
+
+  uploadImage(recipeId: string, file: File): Observable<Recipe> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<RecipeDto>(`${this.apiUrl}/${recipeId}/image`, formData).pipe(
+      map(item => this.fromDto(item)),
+      tap(saved => this.recipes.set(this.upsertInMemory(this.recipes(), saved)))
     );
   }
 

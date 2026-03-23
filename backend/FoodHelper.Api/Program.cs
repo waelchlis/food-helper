@@ -1,13 +1,27 @@
+using FoodHelper.Api.Authorization;
+using FoodHelper.Api.Data;
 using FoodHelper.Api.Options;
 using FoodHelper.Api.Services;
 using Google.Cloud.Firestore;
+using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load local settings in Development and production settings for all other environments.
+var environmentSettingsFile = builder.Environment.IsDevelopment()
+    ? "appsettings.Development.json"
+    : "appsettings.Production.json";
+builder.Configuration.AddJsonFile(
+    environmentSettingsFile,
+    optional: builder.Environment.IsDevelopment(),
+    reloadOnChange: builder.Environment.IsDevelopment());
+
 builder.Services.Configure<FirebaseOptions>(builder.Configuration.GetSection("Firebase"));
 builder.Services.Configure<GoogleOidcOptions>(builder.Configuration.GetSection("GoogleOidc"));
+builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection("Storage"));
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
@@ -43,7 +57,11 @@ builder.Services
             NameClaimType = "name"
         };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.Requirements.Add(new AdminRequirement()));
+});
+builder.Services.AddSingleton<IAuthorizationHandler, AdminRequirementHandler>();
 
 var firebase = builder.Configuration.GetSection("Firebase").Get<FirebaseOptions>() ?? new FirebaseOptions();
 if (!string.IsNullOrWhiteSpace(firebase.GoogleApplicationCredentialsPath))
@@ -59,12 +77,29 @@ if (!string.IsNullOrWhiteSpace(firebase.ProjectId))
         builder.Services.AddSingleton(firestore);
         builder.Services.AddSingleton<IRecipeStore, FirestoreRecipeStore>();
         builder.Services.AddSingleton<IShoppingListStore, FirestoreShoppingListStore>();
+        builder.Services.AddSingleton<IAdminStore, FirestoreAdminStore>();
+        builder.Services.AddSingleton<IIngredientWordStore, FirestoreIngredientWordStore>();
+
+        var storageBucket = builder.Configuration.GetValue<string>("Storage:BucketName");
+        if (!string.IsNullOrWhiteSpace(storageBucket))
+        {
+            var storageClient = StorageClient.Create();
+            builder.Services.AddSingleton(storageClient);
+            builder.Services.AddSingleton<IImageStore, FirebaseImageStore>();
+        }
+        else
+        {
+            builder.Services.AddSingleton<IImageStore, InMemoryImageStore>();
+        }
     }
     catch (Exception ex)
     {
         builder.Logging.AddConsole();
         builder.Services.AddSingleton<IRecipeStore, InMemoryRecipeStore>();
         builder.Services.AddSingleton<IShoppingListStore, InMemoryShoppingListStore>();
+        builder.Services.AddSingleton<IAdminStore, InMemoryAdminStore>();
+        builder.Services.AddSingleton<IImageStore, InMemoryImageStore>();
+        builder.Services.AddSingleton<IIngredientWordStore, InMemoryIngredientWordStore>();
         Console.WriteLine($"Firestore initialization failed: {ex.Message}. Falling back to in-memory stores.");
     }
 }
@@ -72,6 +107,9 @@ else
 {
     builder.Services.AddSingleton<IRecipeStore, InMemoryRecipeStore>();
     builder.Services.AddSingleton<IShoppingListStore, InMemoryShoppingListStore>();
+    builder.Services.AddSingleton<IAdminStore, InMemoryAdminStore>();
+    builder.Services.AddSingleton<IImageStore, InMemoryImageStore>();
+    builder.Services.AddSingleton<IIngredientWordStore, InMemoryIngredientWordStore>();
 }
 
 var app = builder.Build();
@@ -87,7 +125,11 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseCors("frontend");
 app.UseAuthentication();
 app.UseAuthorization();
@@ -95,4 +137,18 @@ app.UseAuthorization();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapControllers();
 
-app.Run();
+// Seed default ingredient words
+using (var scope = app.Services.CreateScope())
+{
+    var wordStore = scope.ServiceProvider.GetRequiredService<IIngredientWordStore>();
+    try
+    {
+        await wordStore.SeedAsync(DefaultIngredients.German, CancellationToken.None);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Ingredient seeding failed: {ex.Message}");
+    }
+}
+
+await app.RunAsync();

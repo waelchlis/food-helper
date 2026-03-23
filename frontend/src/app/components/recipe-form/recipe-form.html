@@ -56,7 +56,19 @@
               <div class="ingredient-row">
                 <mat-form-field appearance="outline">
                   <mat-label>Ingredient</mat-label>
-                  <input matInput [ngModel]="ingredient.name" (ngModelChange)="updateIngredient(i, 'name', $event)" placeholder="e.g., Flour">
+                  <input matInput
+                    [ngModel]="ingredient.name"
+                    (ngModelChange)="updateIngredient(i, 'name', $event)"
+                    (input)="onIngredientNameInput(i, $any($event.target).value)"
+                    (focus)="onIngredientInputFocus(i)"
+                    (keydown.enter)="onIngredientNameEnter(i); $event.preventDefault()"
+                    [matAutocomplete]="ingredientAuto"
+                    placeholder="e.g., Mehl">
+                  <mat-autocomplete #ingredientAuto="matAutocomplete">
+                    @for (option of (filteredIngredientWords()[i] || []); track option) {
+                      <mat-option [value]="option">{{ option }}</mat-option>
+                    }
+                  </mat-autocomplete>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
@@ -80,6 +92,30 @@
         }
       </mat-card-content>
     </mat-card>
+
+    <!-- Ingredient Word List Management (Admin only) -->
+    @if (authService.isAdmin()) {
+      <mat-card class="form-section">
+        <mat-card-header>
+          <mat-card-title>Manage Ingredient Words</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="word-list-hint">Words not used in any recipe can be removed.</p>
+          <div class="word-list">
+            @for (word of ingredientWordService.allWords(); track word.id) {
+              <span class="word-chip">
+                {{ word.name }}
+                @if (!usedIngredientNames().has(word.name.toLowerCase())) {
+                  <button mat-icon-button class="word-delete" (click)="ingredientWordService.delete(word.id)">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                }
+              </span>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
 
     <!-- Instructions Section -->
     <mat-card class="form-section">
@@ -128,9 +164,29 @@
       <mat-card-content>
         <div class="form-row">
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Image URL or Base64</mat-label>
+            <mat-label>Image URL</mat-label>
             <input matInput [(ngModel)]="recipe().image" placeholder="Enter image URL...">
           </mat-form-field>
+        </div>
+        <div class="image-upload-section">
+          <span class="upload-divider">or upload a file</span>
+          <button mat-stroked-button type="button" (click)="imageFileInput.click()">
+            <mat-icon>upload</mat-icon>
+            Choose Image
+          </button>
+          <input #imageFileInput type="file" accept="image/*" hidden (change)="onImageFileSelected($event)">
+          @if (imagePreview()) {
+            <div class="image-preview">
+              <img [src]="imagePreview()" alt="Preview">
+              <button mat-icon-button color="warn" (click)="removeSelectedImage()">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          } @else if (recipe().image) {
+            <div class="image-preview">
+              <img [src]="recipe().image" alt="Current image">
+            </div>
+          }
         </div>
       </mat-card-content>
     </mat-card>

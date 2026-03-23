@@ -1,0 +1,49 @@
+<div class="admin-container">
+  <div class="header-section">
+    <h1>Admin Management</h1>
+  </div>
+
+  <mat-card class="add-admin-card">
+    <mat-card-content>
+      <form class="add-admin-form" (ngSubmit)="addAdmin()">
+        <mat-form-field class="email-field" appearance="outline">
+          <mat-label>Email address</mat-label>
+          <input matInput type="email" [(ngModel)]="newEmail" name="email"
+                 placeholder="user@example.com" required />
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="submit" [disabled]="!newEmail.trim()">
+          <mat-icon>person_add</mat-icon>
+          Add Admin
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  @if (error()) {
+    <div class="error-message">
+      <mat-icon>error_outline</mat-icon>
+      {{ error() }}
+    </div>
+  }
+
+  <div class="admins-list">
+    @for (admin of adminService.allAdmins(); track admin.id) {
+      <mat-card class="admin-card">
+        <div class="admin-row">
+          <mat-icon class="status-icon" [matTooltip]="admin.isLinked ? 'Linked — has signed in' : 'Pending — has not signed in yet'">
+            {{ admin.isLinked ? 'check_circle' : 'schedule' }}
+          </mat-icon>
+          <span class="admin-email">{{ admin.email }}</span>
+          <span class="admin-status">{{ admin.isLinked ? 'Linked' : 'Pending' }}</span>
+          <button mat-icon-button color="warn" (click)="removeAdmin(admin)"
+                  [matTooltip]="isSelf(admin) ? 'You cannot remove yourself' : 'Remove admin'"
+                  [disabled]="isSelf(admin)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </mat-card>
+    } @empty {
+      <p class="empty-state">No admins configured yet. Add one above.</p>
+    }
+  </div>
+</div>

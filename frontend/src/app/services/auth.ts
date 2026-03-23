@@ -1,4 +1,5 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { environment } from '../../environments/environment';
 
 type GoogleIdConfiguration = {
@@ -56,8 +57,10 @@ let googleIdentityScriptPromise: Promise<GoogleAccountsId> | null = null;
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly http = inject(HttpClient);
   private readonly initialized = signal(false);
   private readonly authenticated = signal(false);
+  private readonly admin = signal(false);
   private readonly idToken = signal('');
   private readonly identityClaims = signal<GoogleIdentityClaims | null>(null);
   private googleAccountsId: GoogleAccountsId | null = null;
@@ -67,6 +70,7 @@ export class AuthService {
 
   readonly isReady = this.initialized.asReadonly();
   readonly isAuthenticated = computed(() => this.authenticated());
+  readonly isAdmin = computed(() => this.admin());
   readonly isConfigured = computed(() => this.hasGoogleClientId);
   readonly userDisplayName = computed(() => {
     const claims = this.identityClaims();
@@ -116,6 +120,7 @@ export class AuthService {
     this.googleAccountsId?.cancel();
     this.googleAccountsId?.disableAutoSelect();
     this.clearSession();
+    this.admin.set(false);
   }
 
   renderButton(hostElement: HTMLElement): void {
@@ -158,6 +163,7 @@ export class AuthService {
     this.idToken.set(storedToken);
     this.identityClaims.set(claims);
     this.authenticated.set(true);
+    this.fetchAdminStatus();
   }
 
   private persistSession(token: string): void {
@@ -171,6 +177,14 @@ export class AuthService {
     this.idToken.set(token);
     this.identityClaims.set(claims);
     this.authenticated.set(true);
+    this.fetchAdminStatus();
+  }
+
+  private fetchAdminStatus(): void {
+    this.http.get<{ isAdmin: boolean }>(`${environment.apiBaseUrl}/auth/me`).subscribe({
+      next: (res) => this.admin.set(res.isAdmin),
+      error: () => this.admin.set(false),
+    });
   }
 
   private clearSession(): void {
@@ -178,6 +192,7 @@ export class AuthService {
     this.idToken.set('');
     this.identityClaims.set(null);
     this.authenticated.set(false);
+    this.admin.set(false);
   }
 
   private parseJwtClaims(token: string): GoogleIdentityClaims | null {

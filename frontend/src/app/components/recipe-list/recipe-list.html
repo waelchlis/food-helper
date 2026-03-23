@@ -1,7 +1,7 @@
 <div class="recipe-list-container">
   <div class="header-section">
     <h1>Recipes</h1>
-    @if (authService.isAuthenticated()) {
+    @if (authService.isAdmin()) {
       <button mat-raised-button color="primary" routerLink="/recipe/new">
         <mat-icon>add</mat-icon>
         New Recipe
@@ -41,7 +41,7 @@
       @for (recipe of filteredRecipes(); track recipe.id) {
         <app-recipe-card
           [recipe]="recipe"
-          [canManageRecipes]="authService.isAuthenticated()"
+          [canManageRecipes]="authService.isAdmin()"
           (delete)="deleteRecipe($event)">
         </app-recipe-card>
       }

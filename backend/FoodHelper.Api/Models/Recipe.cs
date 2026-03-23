@@ -32,6 +32,9 @@ public sealed class Recipe
     [FirestoreProperty("image")]
     public string? Image { get; set; }
 
+    [FirestoreProperty("creatorName")]
+    public string CreatorName { get; set; } = string.Empty;
+
     [FirestoreProperty("createdAt")]
     public DateTime CreatedAt { get; set; }
 

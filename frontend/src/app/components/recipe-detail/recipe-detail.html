@@ -16,6 +16,9 @@
     <div class="recipe-info">
       <h1>{{ recipe()!.name }}</h1>
       <p class="description">{{ recipe()!.description }}</p>
+      @if (recipe()!.creatorName) {
+        <p class="creator-info">Created by: {{ recipe()!.creatorName }}, {{ recipe()!.createdAt | date:'longDate' }}</p>
+      }
 
       <!-- Meta Information -->
       <div class="meta-section">
@@ -109,7 +112,7 @@
         <mat-icon>arrow_back</mat-icon>
         Back to Recipes
       </button>
-      @if (authService.isAuthenticated()) {
+      @if (authService.isAdmin()) {
         <button mat-raised-button color="primary" [routerLink]="['/recipe', recipe()!.id, 'edit']">
           <mat-icon>edit</mat-icon>
           Edit Recipe

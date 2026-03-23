@@ -3,18 +3,90 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "ng serve",
+      "name": "frontend: launch chrome",
       "type": "chrome",
       "request": "launch",
-      "preLaunchTask": "npm: start",
+      "preLaunchTask": "frontend: start",
       "url": "http://localhost:4200/"
+    },
+    {
+      "name": "frontend: start only",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm start",
+      "cwd": "${workspaceFolder}/frontend"
     },
     {
       "name": "ng test",
       "type": "chrome",
       "request": "launch",
-      "preLaunchTask": "npm: test",
+      "preLaunchTask": "frontend: test",
       "url": "http://localhost:9876/debug.html"
+    },
+    {
+      "name": "backend: launch api",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "backend: build",
+      "program": "${workspaceFolder}/.dotnet/dotnet",
+      "args": [
+        "${workspaceFolder}/backend/FoodHelper.Api/bin/Debug/net10.0/FoodHelper.Api.dll"
+      ],
+      "cwd": "${workspaceFolder}/backend/FoodHelper.Api",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5000",
+        "DOTNET_ROOT": "${workspaceFolder}/.dotnet",
+        "DOTNET_MULTILEVEL_LOOKUP": "0",
+        "PATH": "${workspaceFolder}/.dotnet:${env:PATH}"
+      },
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(http://\\S+)"
+      }
+    },
+    {
+      "name": "backend: launch api (no browser)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "backend: build",
+      "program": "${workspaceFolder}/.dotnet/dotnet",
+      "args": [
+        "${workspaceFolder}/backend/FoodHelper.Api/bin/Debug/net10.0/FoodHelper.Api.dll"
+      ],
+      "cwd": "${workspaceFolder}/backend/FoodHelper.Api",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5000",
+        "DOTNET_ROOT": "${workspaceFolder}/.dotnet",
+        "DOTNET_MULTILEVEL_LOOKUP": "0",
+        "PATH": "${workspaceFolder}/.dotnet:${env:PATH}"
+      }
+    },
+    {
+      "name": "backend: attach",
+      "type": "coreclr",
+      "request": "attach"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "debug: frontend + backend (http)",
+      "configurations": [
+        "backend: launch api",
+        "frontend: launch chrome"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "debug: frontend + backend (http, no browser)",
+      "configurations": [
+        "backend: launch api (no browser)",
+        "frontend: start only"
+      ],
+      "stopAll": true
     }
   ]
 }
