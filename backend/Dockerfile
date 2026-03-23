@@ -1,6 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
+COPY global.json ./
 COPY backend/FoodHelper.Api/FoodHelper.Api.csproj backend/FoodHelper.Api/
 RUN dotnet restore backend/FoodHelper.Api/FoodHelper.Api.csproj
 
