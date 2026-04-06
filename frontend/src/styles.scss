@@ -28,7 +28,7 @@ body {
   // Set a default background, font and text colors for the application using
   // Angular Material's system-level CSS variables. Learn more about these
   // variables at https://material.angular.dev/guide/system-variables
-  background-color: #f5f3fa;
+  background-color: #077a48;
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
 
@@ -42,11 +42,16 @@ body {
 
 html.dark-mode body {
   color-scheme: dark;
-  background-color: #1e1a2e;
+  background-color: #352b52;
 }
 
 html.dark-mode .app-content {
-  background-color: #1e1a2e;
+  background-color: #4a3f6b;
+}
+
+html.dark-mode .app-content::before {
+  filter: brightness(0);
+  opacity: 0.1;
 }
 
 html.dark-mode .recipe-detail-container {
@@ -95,11 +100,16 @@ html.dark-mode .recipe-card {
 }
 
 html.dark-mode .recipe-list-container .recipes-grid .no-recipes mat-icon {
-  color: #4a3f6b !important;
+  color: #7c6b9e !important;
 }
 
 html.dark-mode .shopping-list-container .empty-state mat-icon {
-  color: #4a3f6b !important;
+  color: #7c6b9e !important;
+}
+
+html.dark-mode .recipe-list-container .search-filter-section {
+  background: rgba(30, 24, 50, 0.75);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
 }
 
 html.dark-mode .shopping-list-container .item-card .item-row .item-info .item-quantity .item-unit {

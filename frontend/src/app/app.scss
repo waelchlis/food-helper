@@ -135,7 +135,22 @@ $mobile-breakpoint: 768px;
 .app-content {
   margin-top: 64px;
   min-height: calc(100vh - 64px);
-  background-color: #f5f3fa;
+  background-color: #0aac68;
+  position: relative;
+  isolation: isolate;
   overflow-x: hidden;
   transition: background-color 0.3s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: url('/food-pattern.png');
+    background-repeat: repeat;
+    background-size: 510px 510px;
+    filter: brightness(0) invert(1);
+    opacity: 0.18;
+  }
 }

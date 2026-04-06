@@ -101,7 +101,7 @@ export class AuthService {
           cancel_on_tap_outside: true,
           context: 'signin',
           itp_support: true,
-          use_fedcm_for_button: true,
+          use_fedcm_for_button: false,
         });
       })
       .catch(() => {
