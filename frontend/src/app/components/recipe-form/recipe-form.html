@@ -66,7 +66,15 @@
                     placeholder="e.g., Mehl">
                   <mat-autocomplete #ingredientAuto="matAutocomplete">
                     @for (option of (filteredIngredientWords()[i] || []); track option) {
-                      <mat-option [value]="option">{{ option }}</mat-option>
+                      <mat-option [value]="option">
+                        <span class="autocomplete-word">{{ option }}</span>
+                        @if (!usedIngredientNames().has(option.toLowerCase())) {
+                          <button mat-icon-button class="autocomplete-delete-btn"
+                            (click)="deleteIngredientWordByName(option, $event)">
+                            <mat-icon>close</mat-icon>
+                          </button>
+                        }
+                      </mat-option>
                     }
                   </mat-autocomplete>
                 </mat-form-field>
@@ -92,30 +100,6 @@
         }
       </mat-card-content>
     </mat-card>
-
-    <!-- Ingredient Word List Management (Admin only) -->
-    @if (authService.isAdmin()) {
-      <mat-card class="form-section">
-        <mat-card-header>
-          <mat-card-title>Manage Ingredient Words</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <p class="word-list-hint">Words not used in any recipe can be removed.</p>
-          <div class="word-list">
-            @for (word of ingredientWordService.allWords(); track word.id) {
-              <span class="word-chip">
-                {{ word.name }}
-                @if (!usedIngredientNames().has(word.name.toLowerCase())) {
-                  <button mat-icon-button class="word-delete" (click)="ingredientWordService.delete(word.id)">
-                    <mat-icon>close</mat-icon>
-                  </button>
-                }
-              </span>
-            }
-          </div>
-        </mat-card-content>
-      </mat-card>
-    }
 
     <!-- Instructions Section -->
     <mat-card class="form-section">

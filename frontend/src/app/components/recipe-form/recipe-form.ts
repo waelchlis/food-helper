@@ -321,6 +321,16 @@ export class RecipeFormComponent implements OnInit {
     }
   }
 
+  deleteIngredientWordByName(name: string, event: MouseEvent): void {
+    event.stopPropagation();
+    const word = this.ingredientWordService.allWords().find(
+      w => w.name.toLowerCase() === name.toLowerCase()
+    );
+    if (word) {
+      this.ingredientWordService.delete(word.id);
+    }
+  }
+
   cancel(): void {
     if (this.isEditMode() && this.recipe().id) {
       this.router.navigate(['/recipe', this.recipe().id]);

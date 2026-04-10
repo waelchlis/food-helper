@@ -129,3 +129,53 @@ html.dark-mode .mat-mdc-dialog-container {
   --mdc-dialog-supporting-text-color: #e0d9f5;
   --mdc-dialog-subhead-color: #e0d9f5;
 }
+
+/* Autocomplete option with inline delete button */
+.mat-mdc-option .mdc-list-item__primary-text {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.mat-mdc-option .autocomplete-word {
+  flex: 1;
+}
+
+.mat-mdc-option .autocomplete-delete-btn {
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  margin-left: auto;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  .mat-mdc-button-touch-target {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .mat-mdc-button-persistent-ripple,
+  .mat-ripple {
+    border-radius: 50%;
+  }
+
+  &.mat-mdc-icon-button .mat-mdc-button-base {
+    padding: 0;
+  }
+
+  mat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+    line-height: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+  }
+}
+
+.mat-mdc-option:hover .autocomplete-delete-btn {
+  opacity: 1;
+}
