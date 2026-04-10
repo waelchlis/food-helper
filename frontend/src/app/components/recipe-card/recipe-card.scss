@@ -42,7 +42,11 @@
 
   mat-card-subtitle {
     margin-top: 0.5rem;
-    color: #666;
+    color: var(--mat-sys-on-surface-variant);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   mat-card-content {

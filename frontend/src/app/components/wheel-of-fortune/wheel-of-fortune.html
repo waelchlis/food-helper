@@ -1,0 +1,127 @@
+<div class="wof-container">
+  <h1 class="title">
+    <mat-icon>donut_large</mat-icon>
+    Wheel of Fortune
+  </h1>
+
+  <div class="wheel-section">
+    <canvas #wheelCanvas width="460" height="460"></canvas>
+  </div>
+
+  <div class="spin-row">
+    <button mat-raised-button color="primary" class="spin-btn"
+            (click)="spin()"
+            [disabled]="spinning() || filteredRecipes().length === 0">
+      <mat-icon [class.spinning-icon]="spinning()">autorenew</mat-icon>
+      {{ spinning() ? 'Spinning…' : 'Spin!' }}
+    </button>
+  </div>
+
+  @if (winner()) {
+    <mat-card class="winner-card">
+      <mat-card-header>
+        <mat-card-title>🎉 {{ winner()!.name }}</mat-card-title>
+        @if (winner()!.description) {
+          <mat-card-subtitle>{{ winner()!.description }}</mat-card-subtitle>
+        }
+      </mat-card-header>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="goToRecipe(winner()!)">
+          <mat-icon>visibility</mat-icon>
+          View Recipe
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+
+  <mat-divider></mat-divider>
+
+  <!-- Category filter -->
+  <mat-card class="filter-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>label</mat-icon>
+        Filter by Categories
+      </mat-card-title>
+      <mat-card-subtitle>
+        Select one or more categories to limit the wheel to those recipes
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      @if (allCategories().length === 0) {
+        <p class="recipe-count">No categories defined yet.</p>
+      } @else {
+        <div class="chips-row">
+          @for (category of allCategories(); track category.id) {
+            <div class="chip" [class.chip-active]="selectedCategories().includes(category.id)"
+                 (click)="toggleCategory(category.id)" style="cursor:pointer">
+              <span>{{ category.name }}</span>
+            </div>
+          }
+        </div>
+      }
+      <p class="recipe-count">
+        <mat-icon>restaurant</mat-icon>
+        {{ filteredRecipes().length }} recipe{{ filteredRecipes().length !== 1 ? 's' : '' }} on the wheel
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Ingredient filter -->
+  <mat-card class="filter-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>filter_list</mat-icon>
+        Filter by Ingredients
+      </mat-card-title>
+      <mat-card-subtitle>
+        Only recipes containing <strong>all</strong> selected ingredients will appear — combined with any category filter
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      @if (selectedIngredients().length > 0) {
+        <div class="chips-row">
+          @for (ingredient of selectedIngredients(); track ingredient) {
+            <div class="chip">
+              <span>{{ ingredient }}</span>
+              <button mat-icon-button class="chip-remove" (click)="removeIngredient(ingredient)">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="add-ingredient-row">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ingredient-field">
+          <mat-label>Add ingredient</mat-label>
+          <input matInput
+                 [ngModel]="ingredientInput()"
+                 (ngModelChange)="ingredientInput.set($event)"
+                 (keydown.enter)="addIngredient(); $event.preventDefault()"
+                 [matAutocomplete]="auto"
+                 placeholder="e.g. tomato">
+          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addIngredient($event.option.value)">
+            @for (option of autocompleteOptions(); track option) {
+              <mat-option [value]="option">{{ option }}</mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+
+      <p class="recipe-count">
+        <mat-icon>restaurant</mat-icon>
+        {{ filteredRecipes().length }} recipe{{ filteredRecipes().length !== 1 ? 's' : '' }} on the wheel
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  @if (selectedCategories().length > 0 || selectedIngredients().length > 0) {
+    <div class="reset-row">
+      <button mat-stroked-button (click)="resetAllFilters()">
+        <mat-icon>filter_alt_off</mat-icon>
+        Reset all filters
+      </button>
+    </div>
+  }
+</div>

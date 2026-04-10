@@ -1,5 +1,24 @@
 @if (recipe()) {
   <div class="recipe-detail-container">
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button mat-raised-button routerLink="/recipes">
+        <mat-icon>arrow_back</mat-icon>
+        Back to Recipes
+      </button>
+      <div class="action-buttons-right">
+        @if (authService.isAdmin()) {
+          <button mat-raised-button color="primary" [routerLink]="['/recipe', recipe()!.id, 'edit']">
+            <mat-icon>edit</mat-icon>
+            Edit Recipe
+          </button>
+        }
+        <button mat-raised-button color="accent" (click)="addToShoppingList()">
+          <mat-icon>shopping_cart</mat-icon>
+          Add to Shopping List
+        </button>
+      </div>
+    </div>
     <!-- Header with image -->
     <div class="recipe-header">
       @if (recipe()!.image) {
@@ -46,30 +65,6 @@
       </div>
 
       <!-- Servings Scaler -->
-      <mat-card class="scale-card">
-        <mat-card-header>
-          <mat-card-title>Adjust Servings</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="servings-control">
-            <button mat-icon-button (click)="decreaseServings()">
-              <mat-icon>remove</mat-icon>
-            </button>
-            <mat-form-field appearance="outline">
-              <mat-label>Servings</mat-label>
-              <input matInput type="number" [(ngModel)]="desiredServings" (ngModelChange)="onServingsChange()" min="1">
-            </mat-form-field>
-            <button mat-icon-button (click)="increaseServings()">
-              <mat-icon>add</mat-icon>
-            </button>
-            @if (desiredServings() !== recipe()!.servings) {
-              <button mat-stroked-button (click)="resetServings()">
-                Reset
-              </button>
-            }
-          </div>
-        </mat-card-content>
-      </mat-card>
     </div>
 
     <div class="recipe-content">
@@ -77,6 +72,23 @@
       <mat-card class="section-card">
         <mat-card-header>
           <mat-card-title>Ingredients</mat-card-title>
+          <div class="servings-control">
+            @if (desiredServings() !== recipe()!.servings) {
+              <button mat-stroked-button (click)="resetServings()">
+                Reset
+              </button>
+            }
+            <button mat-icon-button (click)="decreaseServings()">
+              <mat-icon>remove</mat-icon>
+            </button>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Servings</mat-label>
+              <input matInput type="number" [(ngModel)]="desiredServings" (ngModelChange)="onServingsChange()" min="1">
+            </mat-form-field>
+            <button mat-icon-button (click)="increaseServings()">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
         </mat-card-header>
         <mat-card-content>
           <div class="ingredients-list">
@@ -104,24 +116,6 @@
           </ol>
         </mat-card-content>
       </mat-card>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="action-buttons">
-      <button mat-raised-button routerLink="/recipes">
-        <mat-icon>arrow_back</mat-icon>
-        Back to Recipes
-      </button>
-      @if (authService.isAdmin()) {
-        <button mat-raised-button color="primary" [routerLink]="['/recipe', recipe()!.id, 'edit']">
-          <mat-icon>edit</mat-icon>
-          Edit Recipe
-        </button>
-      }
-      <button mat-raised-button color="accent" (click)="addToShoppingList()">
-        <mat-icon>shopping_cart</mat-icon>
-        Add to Shopping List
-      </button>
     </div>
   </div>
 } @else {

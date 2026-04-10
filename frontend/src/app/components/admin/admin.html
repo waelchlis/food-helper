@@ -6,7 +6,7 @@
   <mat-card class="add-admin-card">
     <mat-card-content>
       <form class="add-admin-form" (ngSubmit)="addAdmin()">
-        <mat-form-field class="email-field" appearance="outline">
+        <mat-form-field class="email-field" appearance="outline" subscriptSizing="dynamic">
           <mat-label>Email address</mat-label>
           <input matInput type="email" [(ngModel)]="newEmail" name="email"
                  placeholder="user@example.com" required />
@@ -55,7 +55,7 @@
   <mat-card class="add-admin-card">
     <mat-card-content>
       <form class="add-admin-form" (ngSubmit)="addCategory()">
-        <mat-form-field class="email-field" appearance="outline">
+        <mat-form-field class="email-field" appearance="outline" subscriptSizing="dynamic">
           <mat-label>Category name</mat-label>
           <input matInput [(ngModel)]="newCategoryName" name="categoryName"
                  placeholder="e.g., Breakfast, Vegan, Quick &amp; Easy" required />

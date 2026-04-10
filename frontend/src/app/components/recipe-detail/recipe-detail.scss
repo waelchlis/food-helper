@@ -44,7 +44,7 @@
 
     .description {
       font-size: 1.1rem;
-      color: #666;
+      color: var(--mat-sys-on-surface-variant);
       margin-bottom: 1rem;
     }
 
@@ -91,25 +91,6 @@
       }
     }
 
-    .scale-card {
-      mat-card-content {
-        padding: 1.5rem;
-
-        .servings-control {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-
-          button {
-            padding: 0.5rem;
-          }
-
-          mat-form-field {
-            width: 120px;
-          }
-        }
-      }
-    }
   }
 
   .recipe-content {
@@ -126,11 +107,31 @@
       mat-card-header {
         padding: 1.5rem;
         border-bottom: 1px solid #ddd6ed;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
       }
 
       mat-card-title {
         font-size: 1.3rem;
         margin: 0;
+        flex: 1;
+      }
+
+      .servings-control {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-left: auto;
+
+        mat-form-field {
+          width: 80px;
+
+          input {
+            text-align: center;
+          }
+        }
       }
 
       mat-card-content {
@@ -181,8 +182,17 @@
 
   .action-buttons {
     display: flex;
-    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
     flex-wrap: wrap;
+    gap: 1rem;
+    padding-bottom: 1.5rem;
+
+    .action-buttons-right {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
 
     button {
       display: flex;
