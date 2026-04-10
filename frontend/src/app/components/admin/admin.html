@@ -46,4 +46,67 @@
       <p class="empty-state">No admins configured yet. Add one above.</p>
     }
   </div>
+
+  <!-- Category Management -->
+  <div class="section-header">
+    <h2>Recipe Categories</h2>
+  </div>
+
+  <mat-card class="add-admin-card">
+    <mat-card-content>
+      <form class="add-admin-form" (ngSubmit)="addCategory()">
+        <mat-form-field class="email-field" appearance="outline">
+          <mat-label>Category name</mat-label>
+          <input matInput [(ngModel)]="newCategoryName" name="categoryName"
+                 placeholder="e.g., Breakfast, Vegan, Quick &amp; Easy" required />
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="submit" [disabled]="!newCategoryName.trim()">
+          <mat-icon>add</mat-icon>
+          Add Category
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  @if (categoryError()) {
+    <div class="error-message">
+      <mat-icon>error_outline</mat-icon>
+      {{ categoryError() }}
+    </div>
+  }
+
+  <div class="admins-list">
+    @for (category of categoryService.allCategories(); track category.id) {
+      <mat-card class="admin-card">
+        <div class="admin-row">
+          <mat-icon class="status-icon">label</mat-icon>
+          @if (editingCategoryId() === category.id) {
+            <mat-form-field appearance="outline" class="edit-name-field">
+              <input matInput [(ngModel)]="editingCategoryName" [ngModelOptions]="{standalone: true}"
+                     (keydown.enter)="saveEditCategory(category.id); $event.preventDefault()"
+                     (keydown.escape)="cancelEditCategory()">
+            </mat-form-field>
+            <button mat-icon-button color="primary" (click)="saveEditCategory(category.id)"
+                    matTooltip="Save">
+              <mat-icon>check</mat-icon>
+            </button>
+            <button mat-icon-button (click)="cancelEditCategory()" matTooltip="Cancel">
+              <mat-icon>close</mat-icon>
+            </button>
+          } @else {
+            <span class="admin-email">{{ category.name }}</span>
+            <button mat-icon-button (click)="startEditCategory(category)" matTooltip="Rename">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="removeCategory(category.id)"
+                    matTooltip="Delete category">
+              <mat-icon>delete</mat-icon>
+            </button>
+          }
+        </div>
+      </mat-card>
+    } @empty {
+      <p class="empty-state">No categories yet. Add one above.</p>
+    }
+  </div>
 </div>

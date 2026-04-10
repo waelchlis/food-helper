@@ -53,8 +53,7 @@
 
   .admin-card {
     .admin-row {
-      display: grid;
-      grid-template-columns: auto 1fr auto auto;
+      display: flex;
       align-items: center;
       gap: 1rem;
       padding: 0.5rem 1rem;
@@ -66,6 +65,7 @@
       }
 
       .admin-email {
+        flex: 1;
         font-weight: 550;
         font-size: 1.05rem;
         word-break: break-word;
@@ -83,5 +83,21 @@
     padding: 2rem;
     opacity: 0.6;
     font-size: 1.1rem;
+  }
+
+  .section-header {
+    margin-top: 2.5rem;
+    margin-bottom: 1.5rem;
+
+    h2 {
+      margin: 0;
+      font-size: 1.8rem;
+      color: #ffffff;
+    }
+  }
+
+  .edit-name-field {
+    flex: 1;
+    min-width: 200px;
   }
 }

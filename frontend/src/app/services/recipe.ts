@@ -20,6 +20,7 @@ export interface Recipe {
   ingredients: Ingredient[];
   instructions: string[];
   image?: string;
+  categoryId?: string;
   creatorName?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -101,6 +102,7 @@ export class RecipeService {
       ingredients: updates.ingredients ?? existing.ingredients,
       instructions: updates.instructions ?? existing.instructions,
       image: updates.image ?? existing.image,
+      categoryId: updates.categoryId ?? existing.categoryId,
     };
 
     return this.http.put<RecipeDto>(`${this.apiUrl}/${id}`, payload).pipe(
@@ -139,6 +141,10 @@ export class RecipeService {
     return this.recipes().filter(recipe =>
       recipe.ingredients.some(ing => ing.name.toLowerCase() === ingredientName.toLowerCase())
     );
+  }
+
+  filterByCategory(categoryId: string): Recipe[] {
+    return this.recipes().filter(recipe => recipe.categoryId === categoryId);
   }
 
   scaleIngredients(recipe: Recipe, servings: number): Ingredient[] {

@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AdminService, Admin } from '../../services/admin';
 import { AuthService } from '../../services/auth';
+import { CategoryService, Category } from '../../services/category';
 
 @Component({
   selector: 'app-admin',
@@ -28,13 +29,21 @@ export class AdminComponent implements OnInit {
   newEmail = '';
   error = signal('');
 
+  // Category management
+  newCategoryName = '';
+  categoryError = signal('');
+  editingCategoryId = signal<string | null>(null);
+  editingCategoryName = signal('');
+
   constructor(
     public adminService: AdminService,
     public authService: AuthService,
+    public categoryService: CategoryService,
   ) {}
 
   ngOnInit(): void {
     this.adminService.loadAdmins().subscribe();
+    this.categoryService.loadAll();
   }
 
   addAdmin(): void {
@@ -69,5 +78,60 @@ export class AdminComponent implements OnInit {
   isSelf(admin: Admin): boolean {
     const email = this.authService.userEmail();
     return !!email && admin.email.toLowerCase() === email.toLowerCase();
+  }
+
+  addCategory(): void {
+    const name = this.newCategoryName.trim();
+    if (!name) return;
+
+    this.categoryError.set('');
+    this.categoryService.add(name).subscribe({
+      next: () => {
+        this.newCategoryName = '';
+      },
+      error: () => {
+        this.categoryError.set('Failed to add category. It may already exist.');
+      },
+    });
+  }
+
+  startEditCategory(category: Category): void {
+    this.editingCategoryId.set(category.id);
+    this.editingCategoryName.set(category.name);
+  }
+
+  cancelEditCategory(): void {
+    this.editingCategoryId.set(null);
+    this.editingCategoryName.set('');
+  }
+
+  saveEditCategory(id: string): void {
+    const name = this.editingCategoryName().trim();
+    if (!name) return;
+
+    this.categoryError.set('');
+    this.categoryService.rename(id, name).subscribe({
+      next: () => {
+        this.editingCategoryId.set(null);
+        this.editingCategoryName.set('');
+      },
+      error: () => {
+        this.categoryError.set('Failed to rename category. The name may already be in use.');
+      },
+    });
+  }
+
+  removeCategory(id: string): void {
+    this.categoryError.set('');
+    this.categoryService.delete(id).subscribe({
+      next: (removed) => {
+        if (!removed) {
+          this.categoryError.set('Failed to remove category.');
+        }
+      },
+      error: () => {
+        this.categoryError.set('Cannot remove category — it may still be used by one or more recipes.');
+      },
+    });
   }
 }

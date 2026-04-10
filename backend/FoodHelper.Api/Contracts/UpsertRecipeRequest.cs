@@ -29,4 +29,6 @@ public sealed class UpsertRecipeRequest
 
     [MaxLength(2048)]
     public string? Image { get; init; }
+
+    public string? CategoryId { get; init; }
 }

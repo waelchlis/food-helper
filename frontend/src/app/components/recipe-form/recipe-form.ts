@@ -9,9 +9,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatSelectModule } from '@angular/material/select';
 import { Recipe, RecipeService, Ingredient } from '../../services/recipe';
 import { AuthService } from '../../services/auth';
 import { IngredientWordService } from '../../services/ingredient-word';
+import { CategoryService } from '../../services/category';
 
 @Component({
   selector: 'app-recipe-form',
@@ -27,6 +29,7 @@ import { IngredientWordService } from '../../services/ingredient-word';
     MatInputModule,
     MatDividerModule,
     MatAutocompleteModule,
+    MatSelectModule,
   ],
   templateUrl: './recipe-form.html',
   styleUrl: './recipe-form.scss',
@@ -74,10 +77,12 @@ export class RecipeFormComponent implements OnInit {
     private recipeService: RecipeService,
     protected authService: AuthService,
     protected ingredientWordService: IngredientWordService,
+    protected categoryService: CategoryService,
   ) {}
 
   ngOnInit(): void {
     this.ingredientWordService.loadAll();
+    this.categoryService.loadAll();
 
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/recipes']);

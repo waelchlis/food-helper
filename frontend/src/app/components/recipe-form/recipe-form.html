@@ -38,6 +38,19 @@
             <input matInput type="number" [(ngModel)]="recipe().cookTime" min="0">
           </mat-form-field>
         </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Category (optional)</mat-label>
+            <mat-select [ngModel]="recipe().categoryId"
+                        (ngModelChange)="recipe.set({ ...recipe(), categoryId: $event || undefined })">
+              <mat-option [value]="undefined">— None —</mat-option>
+              @for (category of categoryService.allCategories(); track category.id) {
+                <mat-option [value]="category.id">{{ category.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
       </mat-card-content>
     </mat-card>
 
