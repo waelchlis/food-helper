@@ -150,7 +150,12 @@ $mobile-breakpoint: 768px;
     background-image: url('/food-pattern.png');
     background-repeat: repeat;
     background-size: 510px 510px;
+    background-attachment: fixed;
     filter: brightness(0) invert(1);
     opacity: 0.18;
+
+    @media (max-width: $mobile-breakpoint) {
+      background-size: 240px;
+    }
   }
 }

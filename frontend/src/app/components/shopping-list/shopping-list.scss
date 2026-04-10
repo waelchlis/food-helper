@@ -11,6 +11,7 @@
 
     h1 {
       margin: 0;
+      line-height: 1.2;
       font-size: 2.5rem;
       color: #ffffff;
     }
@@ -65,9 +66,15 @@
     .item-row {
       display: grid;
       grid-template-columns: 160px auto 1fr auto;
+      grid-template-areas: "name quantity notes delete";
       align-items: center;
       gap: 1rem;
       padding: 0.5rem 1rem;
+
+      .item-name     { grid-area: name; }
+      .item-quantity { grid-area: quantity; }
+      .notes-input   { grid-area: notes; }
+      &> button      { grid-area: delete; }
 
       .item-name {
         font-weight: 550;
@@ -93,6 +100,19 @@
 
       .notes-input {
         width: 100%;
+      }
+
+      @media (max-width: 600px) {
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto;
+        grid-template-areas:
+          "name delete"
+          "quantity notes";
+        gap: 0.5rem;
+
+        .item-quantity {
+          .inline-amount { width: 80px; }
+        }
       }
     }
   }
