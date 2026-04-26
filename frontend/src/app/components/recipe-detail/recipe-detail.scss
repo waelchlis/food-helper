@@ -176,6 +176,34 @@
             margin-bottom: 1rem;
           }
         }
+
+        .tips-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+
+          .tip-item {
+            padding: 0.75rem;
+            background-color: #ede8f5;
+            border-left: 4px solid #6d28d9;
+            border-radius: 0 4px 4px 0;
+            line-height: 1.6;
+          }
+        }
+      }
+    }
+
+    .tips-card {
+      grid-column: 1 / -1;
+
+      mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        mat-icon {
+          color: #f59e0b;
+        }
       }
     }
   }

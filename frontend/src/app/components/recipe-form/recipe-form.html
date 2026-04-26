@@ -153,6 +153,35 @@
       </mat-card-content>
     </mat-card>
 
+    <!-- Tips Section (Optional) -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>Tips (Optional)</mat-card-title>
+        <button mat-icon-button (click)="addTip()" class="add-button">
+          <mat-icon>add</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        @if (recipe().tips && recipe().tips!.length > 0) {
+          <div class="instructions-form">
+            @for (tip of recipe().tips!; track $index; let i = $index) {
+              <div class="tip-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Tip {{ i + 1 }}</mat-label>
+                  <textarea matInput [ngModel]="tip" (ngModelChange)="updateTip(i, $event)" placeholder="Enter a helpful tip..." rows="2"></textarea>
+                </mat-form-field>
+                <div class="reorder-buttons">
+                  <button mat-icon-button color="warn" (click)="removeTip(i)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
     <!-- Image Section (Optional) -->
     <mat-card class="form-section">
       <mat-card-header>

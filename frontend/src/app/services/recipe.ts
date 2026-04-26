@@ -19,6 +19,7 @@ export interface Recipe {
   cookTime: number;
   ingredients: Ingredient[];
   instructions: string[];
+  tips: string[];
   image?: string;
   categoryId?: string;
   creatorName?: string;
@@ -101,6 +102,7 @@ export class RecipeService {
       cookTime: updates.cookTime ?? existing.cookTime,
       ingredients: updates.ingredients ?? existing.ingredients,
       instructions: updates.instructions ?? existing.instructions,
+      tips: updates.tips ?? existing.tips,
       image: updates.image ?? existing.image,
       categoryId: updates.categoryId ?? existing.categoryId,
     };

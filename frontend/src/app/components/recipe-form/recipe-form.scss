@@ -150,6 +150,21 @@
         .full-width {
           width: 100%;
         }
+
+        .tip-row {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: 1rem;
+          align-items: flex-start;
+
+          mat-form-field {
+            width: 100%;
+          }
+
+          .reorder-buttons {
+            margin-top: 0.75rem;
+          }
+        }
       }
     }
   }

@@ -27,6 +27,8 @@ public sealed class UpsertRecipeRequest
     [Required]
     public List<string> Instructions { get; init; } = [];
 
+    public List<string> Tips { get; init; } = [];
+
     [MaxLength(2048)]
     public string? Image { get; init; }
 

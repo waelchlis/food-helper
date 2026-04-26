@@ -44,6 +44,7 @@ export class RecipeFormComponent implements OnInit {
     cookTime: 30,
     ingredients: [],
     instructions: [],
+    tips: [],
   });
   selectedImageFile: File | null = null;
   imagePreview = signal<string | null>(null);
@@ -104,6 +105,7 @@ export class RecipeFormComponent implements OnInit {
           ...this.recipe(),
           ingredients: [this.createEmptyIngredient()],
           instructions: [''],
+          tips: [],
         });
       }
     });
@@ -146,6 +148,33 @@ export class RecipeFormComponent implements OnInit {
     this.recipe.set({
       ...current,
       ingredients: ingredients.filter((_, i) => i !== index),
+    });
+  }
+
+  addTip(): void {
+    const current = this.recipe();
+    this.recipe.set({
+      ...current,
+      tips: [...(current.tips || []), ''],
+    });
+  }
+
+  removeTip(index: number): void {
+    const current = this.recipe();
+    const tips = current.tips || [];
+    this.recipe.set({
+      ...current,
+      tips: tips.filter((_, i) => i !== index),
+    });
+  }
+
+  updateTip(index: number, value: string): void {
+    const current = this.recipe();
+    const tips = [...(current.tips || [])];
+    tips[index] = value;
+    this.recipe.set({
+      ...current,
+      tips,
     });
   }
 
@@ -297,6 +326,7 @@ export class RecipeFormComponent implements OnInit {
       ...recipe,
       ingredients: validIngredients,
       instructions: validInstructions,
+      tips: (recipe.tips || []).filter(t => t.trim()),
     } as Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'>;
 
     if (this.isEditMode() && recipe.id) {

@@ -29,6 +29,9 @@ public sealed class Recipe
     [FirestoreProperty("instructions")]
     public List<string> Instructions { get; set; } = [];
 
+    [FirestoreProperty("tips")]
+    public List<string> Tips { get; set; } = [];
+
     [FirestoreProperty("image")]
     public string? Image { get; set; }
 

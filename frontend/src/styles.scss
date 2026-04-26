@@ -76,6 +76,15 @@ html.dark-mode .recipe-detail-container {
       .amount { color: #c084fc !important; }
       .unit { color: #a78bca !important; }
     }
+
+    mat-card-content .tips-list .tip-item {
+      background-color: #2d2640 !important;
+      border-left-color: #c084fc !important;
+    }
+  }
+
+  .recipe-content .tips-card mat-card-title mat-icon {
+    color: #c084fc !important;
   }
 }
 /* You can add global styles to this file, and also import other style files */
