@@ -1,0 +1,59 @@
+<div class="home-container">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-emoji">🍳</div>
+      <h1 class="hero-title">Forkfolio</h1>
+      <p class="hero-subtitle">Your personal recipe collection, shopping companion and dinner decider — all in one place.</p>
+      <div class="hero-actions">
+        <button mat-raised-button color="primary" routerLink="/recipes" class="hero-btn">
+          <mat-icon>restaurant</mat-icon>
+          Browse Recipes
+        </button>
+        <button mat-stroked-button  routerLink="/wheel" class="hero-btn hero-btn-outline">
+          <mat-icon>donut_large</mat-icon>
+          Spin the Wheel
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  @if (recipeCount() > 0) {
+    <section class="stats">
+      <div class="stat-item">
+        <span class="stat-value">{{ recipeCount() }}</span>
+        <span class="stat-label">Recipes</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value">{{ categoryCount() }}</span>
+        <span class="stat-label">Categories</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value">∞</span>
+        <span class="stat-label">Possibilities</span>
+      </div>
+    </section>
+  }
+
+  <!-- Feature cards -->
+  <section class="features">
+    @for (feature of features; track feature.title) {
+      <div class="feature-card">
+        <div class="feature-icon">
+          <mat-icon>{{ feature.icon }}</mat-icon>
+        </div>
+        <h2 class="feature-title">{{ feature.title }}</h2>
+        <p class="feature-description">{{ feature.description }}</p>
+        <button mat-stroked-button [routerLink]="feature.link" class="feature-btn">
+          {{ feature.linkLabel }}
+          <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </button>
+      </div>
+    }
+  </section>
+
+</div>

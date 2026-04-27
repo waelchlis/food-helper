@@ -39,7 +39,11 @@
     }
 
     button {
-      height: 56px;
+      height: 40px;
+      flex-shrink: 0;
+      align-self: flex-end;
+      margin-bottom: calc(1.25em + 8px);
+      font-size: 0.85rem;
     }
 
     // Ensure form-field label notch background matches the section so the

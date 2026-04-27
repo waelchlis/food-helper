@@ -39,6 +39,15 @@ export class RecipeListComponent implements OnInit {
   searchQuery = signal<string>('');
   selectedIngredient = signal<string>('');
   selectedCategory = signal<string>('');
+  maxTotalTime = signal<number>(0);
+
+  readonly timeOptions = [
+    { label: '15 minutes', value: 15 },
+    { label: '30 minutes', value: 30 },
+    { label: '45 minutes', value: 45 },
+    { label: '60 minutes', value: 60 },
+    { label: '90 minutes', value: 90 },
+  ];
 
   allIngredients = computed(() => this.recipeService.allIngredients());
   allCategories = computed(() => this.categoryService.allCategories());
@@ -47,16 +56,25 @@ export class RecipeListComponent implements OnInit {
     const query = this.searchQuery();
     const ingredient = this.selectedIngredient();
     const categoryId = this.selectedCategory();
+    const maxTime = this.maxTotalTime();
     const recipes = this.recipeService.getRecipes();
 
+    let results: typeof recipes;
     if (query) {
-      return this.recipeService.searchRecipes(query);
+      results = this.recipeService.searchRecipes(query);
     } else if (ingredient) {
-      return this.recipeService.filterByIngredient(ingredient);
+      results = this.recipeService.filterByIngredient(ingredient);
     } else if (categoryId) {
-      return this.recipeService.filterByCategory(categoryId);
+      results = this.recipeService.filterByCategory(categoryId);
+    } else {
+      results = recipes;
     }
-    return recipes;
+
+    if (maxTime > 0) {
+      results = results.filter(r => r.prepTime + r.cookTime <= maxTime);
+    }
+
+    return results;
   });
 
   constructor(
@@ -89,6 +107,7 @@ export class RecipeListComponent implements OnInit {
     this.searchQuery.set('');
     this.selectedIngredient.set('');
     this.selectedCategory.set('');
+    this.maxTotalTime.set(0);
   }
 
   deleteRecipe(id: string): void {

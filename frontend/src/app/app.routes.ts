@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { HomeComponent } from './components/home/home';
 import { RecipeListComponent } from './components/recipe-list/recipe-list';
 import { RecipeDetailComponent } from './components/recipe-detail/recipe-detail';
 import { RecipeFormComponent } from './components/recipe-form/recipe-form';
@@ -11,12 +12,12 @@ import { adminGuard } from './guards/admin.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'recipes',
+    component: HomeComponent,
     pathMatch: 'full',
   },
   {
     path: 'r',
-    redirectTo: 'recipes',
+    redirectTo: '',
   },
   {
     path: 'recipes',
@@ -51,7 +52,7 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'recipes',
+    redirectTo: '',
   },
 ];
 

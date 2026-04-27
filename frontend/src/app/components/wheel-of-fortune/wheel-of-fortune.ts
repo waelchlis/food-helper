@@ -60,21 +60,32 @@ export class WheelOfFortuneComponent implements OnInit, AfterViewInit, OnDestroy
   ingredientInput = signal('');
   selectedIngredients = signal<string[]>([]);
   selectedCategories = signal<string[]>([]);
+  maxTotalTime = signal<number>(0);
   spinning = signal(false);
   winner = signal<Recipe | null>(null);
 
   readonly allCategories = computed(() => this.categoryService.allCategories());
 
+  readonly timeOptions = [
+    { label: '15 minutes', value: 15 },
+    { label: '30 minutes', value: 30 },
+    { label: '45 minutes', value: 45 },
+    { label: '60 minutes', value: 60 },
+    { label: '90 minutes', value: 90 },
+  ];
+
   filteredRecipes = computed(() => {
     const ingredients = this.selectedIngredients();
     const categories = this.selectedCategories();
+    const maxTime = this.maxTotalTime();
     const recipes = this.recipeService.getRecipes();
     return recipes.filter(r => {
       const matchesCategories = !categories.length || categories.includes(r.categoryId ?? '');
       const matchesIngredients = !ingredients.length || ingredients.every(ing =>
         r.ingredients.some(i => i.name.toLowerCase().includes(ing.toLowerCase()))
       );
-      return matchesCategories && matchesIngredients;
+      const matchesTime = maxTime === 0 || r.prepTime + r.cookTime <= maxTime;
+      return matchesCategories && matchesIngredients && matchesTime;
     });
   });
 
@@ -131,6 +142,7 @@ export class WheelOfFortuneComponent implements OnInit, AfterViewInit, OnDestroy
   resetAllFilters(): void {
     this.selectedCategories.set([]);
     this.selectedIngredients.set([]);
+    this.maxTotalTime.set(0);
     this.ingredientInput.set('');
     this.winner.set(null);
     this.drawWheel();
@@ -188,7 +200,7 @@ export class WheelOfFortuneComponent implements OnInit, AfterViewInit, OnDestroy
     this.drawWheel();
   }
 
-  private drawWheel(): void {
+  protected drawWheel(): void {
     const canvas = this.canvasRef()?.nativeElement;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -251,20 +263,22 @@ export class WheelOfFortuneComponent implements OnInit, AfterViewInit, OnDestroy
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
-      // Label
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(startAngle + sliceAngle / 2);
-      const fontSize = Math.min(13, Math.max(7, Math.floor(160 / n)));
-      ctx.font = `600 ${fontSize}px Roboto, sans-serif`;
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = isWinner ? '#4e3000' : '#37474f';
-      ctx.shadowColor = 'rgba(255,255,255,0.5)';
-      ctx.shadowBlur = 2;
-      const label = this.truncateText(ctx, recipes[i].name, outerRadius * 0.72);
-      ctx.fillText(label, outerRadius - 14, 0);
-      ctx.restore();
+      // Label — hide when there are too many segments to avoid clutter
+      if (n <= 24) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(startAngle + sliceAngle / 2);
+        const fontSize = Math.min(13, Math.max(7, Math.floor(160 / n)));
+        ctx.font = `600 ${fontSize}px Roboto, sans-serif`;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = isWinner ? '#4e3000' : '#37474f';
+        ctx.shadowColor = 'rgba(255,255,255,0.5)';
+        ctx.shadowBlur = 2;
+        const label = this.truncateText(ctx, recipes[i].name, outerRadius * 0.72);
+        ctx.fillText(label, outerRadius - 14, 0);
+        ctx.restore();
+      }
     }
 
     // Outer border ring

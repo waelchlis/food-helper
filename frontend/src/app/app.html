@@ -2,7 +2,7 @@
   <mat-sidenav #sidenav mode="over" position="start" class="mobile-sidenav"
     [opened]="mobileMenuOpen()" (openedChange)="mobileMenuOpen.set($event)">
     <mat-nav-list>
-      <a mat-list-item routerLink="/r" (click)="sidenav.close()">
+      <a mat-list-item routerLink="/" (click)="sidenav.close()">
         <mat-icon matListItemIcon>home</mat-icon>
         <span>Home</span>
       </a>
@@ -32,8 +32,8 @@
       <button mat-icon-button class="menu-btn" (click)="mobileMenuOpen.set(true)">
         <mat-icon>menu</mat-icon>
       </button>
-      <span class="app-title" routerLink="/recipes" style="cursor: pointer;">🍳 Forkfolio</span>
-      <button mat-button routerLink="/r" class="nav-btn desktop-nav">
+      <span class="app-title" routerLink="/" style="cursor: pointer;">🍳 Forkfolio</span>
+      <button mat-button routerLink="/" class="nav-btn desktop-nav">
         <mat-icon>home</mat-icon>
         <span class="nav-label">Home</span>
       </button>

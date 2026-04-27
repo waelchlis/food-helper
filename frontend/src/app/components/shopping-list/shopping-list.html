@@ -48,12 +48,12 @@
           <div class="item-row">
             <span class="item-name">{{ item.name }}</span>
             <div class="item-quantity">
-              <mat-form-field appearance="outline" class="inline-amount">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="inline-amount">
                 <input matInput type="number" [ngModel]="item.amount" (ngModelChange)="updateQuantity(item, $event)" min="0.01" step="0.25">
               </mat-form-field>
               <span class="item-unit">{{ item.unit }}</span>
             </div>
-            <mat-form-field appearance="outline" class="notes-input">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="notes-input">
               <mat-label>Notes</mat-label>
               <input matInput [ngModel]="item.notes" (ngModelChange)="updateNotes(item, $event)" placeholder="Add notes...">
             </mat-form-field>

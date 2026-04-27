@@ -37,7 +37,17 @@
       </mat-select>
     </mat-form-field>
 
-    @if (searchQuery() || selectedIngredient() || selectedCategory()) {
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Max total time</mat-label>
+      <mat-select [(ngModel)]="maxTotalTime">
+        <mat-option [value]="0">Any duration</mat-option>
+        @for (opt of timeOptions; track opt.value) {
+          <mat-option [value]="opt.value">≤ {{ opt.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (searchQuery() || selectedIngredient() || selectedCategory() || maxTotalTime()) {
       <button mat-stroked-button (click)="clearFilters()">
         <mat-icon>clear</mat-icon>
         Clear Filters

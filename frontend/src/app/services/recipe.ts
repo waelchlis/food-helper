@@ -149,6 +149,10 @@ export class RecipeService {
     return this.recipes().filter(recipe => recipe.categoryId === categoryId);
   }
 
+  filterByMaxTotalTime(maxMinutes: number): Recipe[] {
+    return this.recipes().filter(recipe => recipe.prepTime + recipe.cookTime <= maxMinutes);
+  }
+
   scaleIngredients(recipe: Recipe, servings: number): Ingredient[] {
     const scale = servings / recipe.servings;
     return recipe.ingredients.map(ing => ({

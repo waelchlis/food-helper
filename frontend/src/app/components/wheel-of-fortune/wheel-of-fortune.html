@@ -36,6 +36,8 @@
 
   <mat-divider></mat-divider>
 
+  <div class="filters-row">
+
   <!-- Category filter -->
   <mat-card class="filter-card">
     <mat-card-header>
@@ -79,36 +81,36 @@
       </mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
-      @if (selectedIngredients().length > 0) {
-        <div class="chips-row">
-          @for (ingredient of selectedIngredients(); track ingredient) {
-            <div class="chip">
-              <span>{{ ingredient }}</span>
-              <button mat-icon-button class="chip-remove" (click)="removeIngredient(ingredient)">
-                <mat-icon>close</mat-icon>
-              </button>
-            </div>
-          }
-        </div>
-      }
-
-      <div class="add-ingredient-row">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ingredient-field">
-          <mat-label>Add ingredient</mat-label>
-          <input matInput
-                 [ngModel]="ingredientInput()"
-                 (ngModelChange)="ingredientInput.set($event)"
-                 (keydown.enter)="addIngredient(); $event.preventDefault()"
-                 [matAutocomplete]="auto"
-                 placeholder="e.g. tomato">
-          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addIngredient($event.option.value)">
-            @for (option of autocompleteOptions(); track option) {
-              <mat-option [value]="option">{{ option }}</mat-option>
+      <div class="filter-input-area">
+        @if (selectedIngredients().length > 0) {
+          <div class="chips-row">
+            @for (ingredient of selectedIngredients(); track ingredient) {
+              <div class="chip">
+                <span>{{ ingredient }}</span>
+                <button mat-icon-button class="chip-remove" (click)="removeIngredient(ingredient)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
             }
-          </mat-autocomplete>
-        </mat-form-field>
+          </div>
+        }
+        <div class="add-ingredient-row">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ingredient-field">
+            <mat-label>Add ingredient</mat-label>
+            <input matInput
+                   [ngModel]="ingredientInput()"
+                   (ngModelChange)="ingredientInput.set($event)"
+                   (keydown.enter)="addIngredient(); $event.preventDefault()"
+                   [matAutocomplete]="auto"
+                   placeholder="e.g. tomato">
+            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addIngredient($event.option.value)">
+              @for (option of autocompleteOptions(); track option) {
+                <mat-option [value]="option">{{ option }}</mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
+        </div>
       </div>
-
       <p class="recipe-count">
         <mat-icon>restaurant</mat-icon>
         {{ filteredRecipes().length }} recipe{{ filteredRecipes().length !== 1 ? 's' : '' }} on the wheel
@@ -116,7 +118,39 @@
     </mat-card-content>
   </mat-card>
 
-  @if (selectedCategories().length > 0 || selectedIngredients().length > 0) {
+  <!-- Duration filter -->
+  <mat-card class="filter-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>timer</mat-icon>
+        Filter by Total Time
+      </mat-card-title>
+      <mat-card-subtitle>
+        Only recipes with prep + cook time within the selected limit will appear
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="filter-input-area">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="time-field">
+          <mat-label>Max total time</mat-label>
+          <mat-select [(ngModel)]="maxTotalTime" (ngModelChange)="winner.set(null); drawWheel()">
+            <mat-option [value]="0">Any duration</mat-option>
+            @for (opt of timeOptions; track opt.value) {
+              <mat-option [value]="opt.value">&le; {{ opt.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <p class="recipe-count">
+        <mat-icon>restaurant</mat-icon>
+        {{ filteredRecipes().length }} recipe{{ filteredRecipes().length !== 1 ? 's' : '' }} on the wheel
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  </div>
+
+  @if (selectedCategories().length > 0 || selectedIngredients().length > 0 || maxTotalTime()) {
     <div class="reset-row">
       <button mat-stroked-button (click)="resetAllFilters()">
         <mat-icon>filter_alt_off</mat-icon>
