@@ -148,9 +148,40 @@
     </mat-card-content>
   </mat-card>
 
+  <!-- Diet type filter -->
+  <mat-card class="filter-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>eco</mat-icon>
+        Filter by Diet
+      </mat-card-title>
+      <mat-card-subtitle>
+        Limit the wheel to vegetarian or vegan recipes
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="chips-row">
+        <div class="chip diet-chip" [class.chip-active]="selectedDietType().includes('vegetarian')"
+             (click)="selectedDietType.set(selectedDietType().includes('vegetarian') ? selectedDietType().filter(t => t !== 'vegetarian') : [...selectedDietType(), 'vegetarian']); winner.set(null); drawWheel()">
+          <img src="kein-fleisch.png" alt="Vegetarian" class="diet-chip-img">
+          <span>Vegetarian</span>
+        </div>
+        <div class="chip diet-chip" [class.chip-active]="selectedDietType().includes('vegan')"
+             (click)="selectedDietType.set(selectedDietType().includes('vegan') ? selectedDietType().filter(t => t !== 'vegan') : [...selectedDietType(), 'vegan']); winner.set(null); drawWheel()">
+          <img src="vegan.png" alt="Vegan" class="diet-chip-img">
+          <span>Vegan</span>
+        </div>
+      </div>
+      <p class="recipe-count">
+        <mat-icon>restaurant</mat-icon>
+        {{ filteredRecipes().length }} recipe{{ filteredRecipes().length !== 1 ? 's' : '' }} on the wheel
+      </p>
+    </mat-card-content>
+  </mat-card>
+
   </div>
 
-  @if (selectedCategories().length > 0 || selectedIngredients().length > 0 || maxTotalTime()) {
+  @if (selectedCategories().length > 0 || selectedIngredients().length > 0 || selectedDietType().length || maxTotalTime()) {
     <div class="reset-row">
       <button mat-stroked-button (click)="resetAllFilters()">
         <mat-icon>filter_alt_off</mat-icon>

@@ -2,32 +2,72 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  position: relative;
   transition: all 0.3s ease;
   cursor: pointer;
+
+  .card-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
 
   &:hover {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
     transform: translateY(-4px);
   }
 
-  img {
-    height: 200px;
-    object-fit: cover;
+  .image-container {
+    position: relative;
+
+    img[mat-card-image] {
+      height: 200px;
+      object-fit: cover;
+      display: block;
+      width: 100%;
+    }
+
+    .no-image {
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #e4ddf0;
+      color: #b39ddb;
+
+      mat-icon {
+        font-size: 3rem;
+        width: 3rem;
+        height: 3rem;
+      }
+    }
+
+    .diet-badge {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 50%;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+
+      img {
+        width: 70%;
+        height: 70%;
+        object-fit: contain;
+      }
+    }
   }
 
-  .no-image {
-    height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #e4ddf0;
-    color: #b39ddb;
-
-    mat-icon {
-      font-size: 3rem;
-      width: 3rem;
-      height: 3rem;
-    }
+  mat-card-actions {
+    position: relative;
+    z-index: 2;
   }
 
   mat-card-header {

@@ -1,11 +1,20 @@
-<mat-card class="recipe-card" (click)="viewRecipe()">
-  @if (recipe.image) {
-    <img mat-card-image [src]="recipe.image" [alt]="recipe.name">
-  } @else {
-    <div class="no-image">
-      <mat-icon>restaurant</mat-icon>
-    </div>
-  }
+<mat-card class="recipe-card">
+  <a class="card-link" [routerLink]="['/recipe', recipe.id]" [attr.aria-label]="recipe.name"></a>
+  <div class="image-container">
+    @if (recipe.image) {
+      <img mat-card-image [src]="recipe.image" [alt]="recipe.name">
+    } @else {
+      <div class="no-image">
+        <mat-icon>restaurant</mat-icon>
+      </div>
+    }
+    @if (recipe.dietType) {
+      <div class="diet-badge">
+        <img [src]="recipe.dietType === 'vegan' ? 'vegan.png' : 'kein-fleisch.png'"
+          [alt]="recipe.dietType">
+      </div>
+    }
+  </div>
   
   <mat-card-header>
     <mat-card-title>{{ recipe.name }}</mat-card-title>

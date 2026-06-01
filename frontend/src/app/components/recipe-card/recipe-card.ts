@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -24,11 +24,7 @@ export class RecipeCardComponent {
   @Input() canManageRecipes = false;
   @Output() delete = new EventEmitter<string>();
 
-  constructor(private router: Router) {}
-
-  viewRecipe(): void {
-    this.router.navigate(['/recipe', this.recipe.id]);
-  }
+  constructor() {}
 
   onDelete(): void {
     this.delete.emit(this.recipe.id);

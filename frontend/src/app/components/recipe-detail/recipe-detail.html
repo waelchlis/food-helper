@@ -29,6 +29,12 @@
           <p>No image</p>
         </div>
       }
+      @if (recipe()!.dietType) {
+        <div class="diet-badge">
+          <img [src]="recipe()!.dietType === 'vegan' ? 'vegan.png' : 'kein-fleisch.png'"
+            [alt]="recipe()!.dietType">
+        </div>
+      }
     </div>
 
     <!-- Recipe Info -->

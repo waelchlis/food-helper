@@ -38,6 +38,9 @@ public sealed class Recipe
     [FirestoreProperty("categoryId")]
     public string? CategoryId { get; set; }
 
+    [FirestoreProperty("dietType")]
+    public string? DietType { get; set; }
+
     [FirestoreProperty("creatorName")]
     public string CreatorName { get; set; } = string.Empty;
 

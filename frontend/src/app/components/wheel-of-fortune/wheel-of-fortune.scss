@@ -150,6 +150,17 @@
           padding-right: 0.75rem;
         }
 
+        &.diet-chip {
+          padding: 0.2rem 0.75rem;
+          cursor: pointer;
+
+          .diet-chip-img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+          }
+        }
+
         .chip-remove {
           width: 24px;
           height: 24px;

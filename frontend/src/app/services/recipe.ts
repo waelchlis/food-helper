@@ -22,6 +22,7 @@ export interface Recipe {
   tips: string[];
   image?: string;
   categoryId?: string;
+  dietType?: 'vegan' | 'vegetarian';
   creatorName?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -105,6 +106,7 @@ export class RecipeService {
       tips: updates.tips ?? existing.tips,
       image: updates.image ?? existing.image,
       categoryId: updates.categoryId ?? existing.categoryId,
+      dietType: 'dietType' in updates ? updates.dietType : existing.dietType,
     };
 
     return this.http.put<RecipeDto>(`${this.apiUrl}/${id}`, payload).pipe(

@@ -38,6 +38,45 @@
       min-width: 200px;
     }
 
+    .diet-filter {
+      display: flex;
+      gap: 0.5rem;
+      align-self: center;
+
+      @media (max-width: 599px) {
+        width: 100%;
+      }
+
+      .diet-filter-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        padding: 7px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        background: transparent;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.15);
+        }
+
+        &.active {
+          background: rgba(255, 255, 255, 0.25);
+          border-color: rgba(255, 255, 255, 0.7);
+        }
+      }
+    }
+
     button {
       height: 40px;
       flex-shrink: 0;

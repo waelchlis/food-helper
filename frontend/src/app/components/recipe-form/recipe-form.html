@@ -51,6 +51,27 @@
             </mat-select>
           </mat-form-field>
         </div>
+
+        <div class="form-row">
+          <div class="diet-type-field">
+            <span class="diet-type-label">Dietary classification</span>
+            <mat-button-toggle-group
+              [(ngModel)]="dietType"
+              class="diet-toggle-group">
+              <mat-button-toggle value="">
+                <span>None</span>
+              </mat-button-toggle>
+              <mat-button-toggle value="vegetarian">
+                <img src="kein-fleisch.png" alt="Vegetarian" class="diet-toggle-img">
+                <span>Vegetarian</span>
+              </mat-button-toggle>
+              <mat-button-toggle value="vegan">
+                <img src="vegan.png" alt="Vegan" class="diet-toggle-img">
+                <span>Vegan</span>
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+        </div>
       </mat-card-content>
     </mat-card>
 
@@ -58,9 +79,6 @@
     <mat-card class="form-section">
       <mat-card-header>
         <mat-card-title>Ingredients</mat-card-title>
-        <button mat-icon-button (click)="addIngredient()" class="add-button">
-          <mat-icon>add</mat-icon>
-        </button>
       </mat-card-header>
       <mat-card-content>
         @if (recipe().ingredients && recipe().ingredients!.length > 0) {
@@ -111,6 +129,9 @@
             }
           </div>
         }
+        <button mat-icon-button (click)="addIngredient()" class="add-button">
+          <mat-icon>add</mat-icon>
+        </button>
       </mat-card-content>
     </mat-card>
 
@@ -118,9 +139,6 @@
     <mat-card class="form-section">
       <mat-card-header>
         <mat-card-title>Instructions</mat-card-title>
-        <button mat-icon-button (click)="addInstruction()" class="add-button">
-          <mat-icon>add</mat-icon>
-        </button>
       </mat-card-header>
       <mat-card-content>
         @if (recipe().instructions && recipe().instructions!.length > 0) {
@@ -150,6 +168,9 @@
             }
           </div>
         }
+        <button mat-icon-button (click)="addInstruction()" class="add-button">
+          <mat-icon>add</mat-icon>
+        </button>
       </mat-card-content>
     </mat-card>
 
@@ -157,9 +178,6 @@
     <mat-card class="form-section">
       <mat-card-header>
         <mat-card-title>Tips (Optional)</mat-card-title>
-        <button mat-icon-button (click)="addTip()" class="add-button">
-          <mat-icon>add</mat-icon>
-        </button>
       </mat-card-header>
       <mat-card-content>
         @if (recipe().tips && recipe().tips!.length > 0) {
@@ -179,6 +197,9 @@
             }
           </div>
         }
+        <button mat-icon-button (click)="addTip()" class="add-button">
+          <mat-icon>add</mat-icon>
+        </button>
       </mat-card-content>
     </mat-card>
 

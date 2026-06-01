@@ -60,6 +60,7 @@ export class WheelOfFortuneComponent implements OnInit, AfterViewInit, OnDestroy
   ingredientInput = signal('');
   selectedIngredients = signal<string[]>([]);
   selectedCategories = signal<string[]>([]);
+  selectedDietType = signal<string[]>([]);
   maxTotalTime = signal<number>(0);
   spinning = signal(false);
   winner = signal<Recipe | null>(null);
@@ -78,6 +79,7 @@ export class WheelOfFortuneComponent implements OnInit, AfterViewInit, OnDestroy
     const ingredients = this.selectedIngredients();
     const categories = this.selectedCategories();
     const maxTime = this.maxTotalTime();
+    const dietType = this.selectedDietType();
     const recipes = this.recipeService.getRecipes();
     return recipes.filter(r => {
       const matchesCategories = !categories.length || categories.includes(r.categoryId ?? '');
@@ -85,7 +87,8 @@ export class WheelOfFortuneComponent implements OnInit, AfterViewInit, OnDestroy
         r.ingredients.some(i => i.name.toLowerCase().includes(ing.toLowerCase()))
       );
       const matchesTime = maxTime === 0 || r.prepTime + r.cookTime <= maxTime;
-      return matchesCategories && matchesIngredients && matchesTime;
+      const matchesDiet = !dietType.length || (r.dietType !== undefined && dietType.includes(r.dietType));
+      return matchesCategories && matchesIngredients && matchesTime && matchesDiet;
     });
   });
 
@@ -142,6 +145,7 @@ export class WheelOfFortuneComponent implements OnInit, AfterViewInit, OnDestroy
   resetAllFilters(): void {
     this.selectedCategories.set([]);
     this.selectedIngredients.set([]);
+    this.selectedDietType.set([]);
     this.maxTotalTime.set(0);
     this.ingredientInput.set('');
     this.winner.set(null);

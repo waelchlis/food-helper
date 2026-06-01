@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSelectModule } from '@angular/material/select';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { Recipe, RecipeService, Ingredient } from '../../services/recipe';
 import { AuthService } from '../../services/auth';
 import { IngredientWordService } from '../../services/ingredient-word';
@@ -30,6 +31,7 @@ import { CategoryService } from '../../services/category';
     MatDividerModule,
     MatAutocompleteModule,
     MatSelectModule,
+    MatButtonToggleModule,
   ],
   templateUrl: './recipe-form.html',
   styleUrl: './recipe-form.scss',
@@ -48,6 +50,7 @@ export class RecipeFormComponent implements OnInit {
   });
   selectedImageFile: File | null = null;
   imagePreview = signal<string | null>(null);
+  dietType = '';
   ingredientFilters = signal<Record<number, string>>({});
 
   filteredIngredientWords = computed(() => {
@@ -97,6 +100,7 @@ export class RecipeFormComponent implements OnInit {
         this.recipeService.loadRecipeById(id).subscribe(existingRecipe => {
           if (existingRecipe) {
             this.recipe.set({ ...existingRecipe });
+            this.dietType = existingRecipe.dietType || '';
           }
         });
       } else {
@@ -327,6 +331,7 @@ export class RecipeFormComponent implements OnInit {
       ingredients: validIngredients,
       instructions: validInstructions,
       tips: (recipe.tips || []).filter(t => t.trim()),
+      dietType: (this.dietType || undefined) as 'vegan' | 'vegetarian' | undefined,
     } as Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'>;
 
     if (this.isEditMode() && recipe.id) {

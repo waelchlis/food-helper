@@ -38,6 +38,36 @@
         .form-row {
           margin-bottom: 1.5rem;
 
+          .diet-type-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+
+            .diet-type-label {
+              font-size: 0.75rem;
+              font-weight: 500;
+              color: var(--mat-sys-on-surface-variant);
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+
+            .diet-toggle-group {
+              width: 100%;
+
+              mat-button-toggle {
+                flex: 1;
+              }
+
+              .diet-toggle-img {
+                width: 28px;
+                height: 28px;
+                object-fit: contain;
+                margin-right: 0.4rem;
+                vertical-align: middle;
+              }
+            }
+          }
+
           &:last-child {
             margin-bottom: 0;
           }
@@ -149,6 +179,11 @@
 
         .full-width {
           width: 100%;
+        }
+
+        .add-button {
+          display: block;
+          margin-top: 0.5rem;
         }
 
         .tip-row {

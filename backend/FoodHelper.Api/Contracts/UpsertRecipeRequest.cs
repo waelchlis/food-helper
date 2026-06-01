@@ -33,4 +33,6 @@ public sealed class UpsertRecipeRequest
     public string? Image { get; init; }
 
     public string? CategoryId { get; init; }
+
+    public string? DietType { get; init; }
 }

@@ -47,7 +47,16 @@
       </mat-select>
     </mat-form-field>
 
-    @if (searchQuery() || selectedIngredient() || selectedCategory() || maxTotalTime()) {
+    <div class="diet-filter">
+      <button class="diet-filter-btn" [class.active]="selectedDietType().includes('vegetarian')" (click)="selectedDietType.set(selectedDietType().includes('vegetarian') ? selectedDietType().filter(t => t !== 'vegetarian') : [...selectedDietType(), 'vegetarian'])" title="Vegetarian">
+        <img src="kein-fleisch.png" alt="Vegetarian">
+      </button>
+      <button class="diet-filter-btn" [class.active]="selectedDietType().includes('vegan')" (click)="selectedDietType.set(selectedDietType().includes('vegan') ? selectedDietType().filter(t => t !== 'vegan') : [...selectedDietType(), 'vegan'])" title="Vegan">
+        <img src="vegan.png" alt="Vegan">
+      </button>
+    </div>
+
+    @if (searchQuery() || selectedIngredient() || selectedCategory() || selectedDietType().length || maxTotalTime()) {
       <button mat-stroked-button (click)="clearFilters()">
         <mat-icon>clear</mat-icon>
         Clear Filters

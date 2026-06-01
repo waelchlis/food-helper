@@ -39,6 +39,7 @@ export class RecipeListComponent implements OnInit {
   searchQuery = signal<string>('');
   selectedIngredient = signal<string>('');
   selectedCategory = signal<string>('');
+  selectedDietType = signal<string[]>([]);
   maxTotalTime = signal<number>(0);
 
   readonly timeOptions = [
@@ -57,6 +58,7 @@ export class RecipeListComponent implements OnInit {
     const ingredient = this.selectedIngredient();
     const categoryId = this.selectedCategory();
     const maxTime = this.maxTotalTime();
+    const dietType = this.selectedDietType();
     const recipes = this.recipeService.getRecipes();
 
     let results: typeof recipes;
@@ -72,6 +74,10 @@ export class RecipeListComponent implements OnInit {
 
     if (maxTime > 0) {
       results = results.filter(r => r.prepTime + r.cookTime <= maxTime);
+    }
+
+    if (dietType.length > 0) {
+      results = results.filter(r => r.dietType !== undefined && dietType.includes(r.dietType));
     }
 
     return results;
@@ -107,6 +113,7 @@ export class RecipeListComponent implements OnInit {
     this.searchQuery.set('');
     this.selectedIngredient.set('');
     this.selectedCategory.set('');
+    this.selectedDietType.set([]);
     this.maxTotalTime.set(0);
   }
 
