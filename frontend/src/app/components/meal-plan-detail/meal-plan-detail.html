@@ -1,0 +1,174 @@
+<div class="meal-plan-detail-container">
+  <!-- Back button + header -->
+  <div class="page-header">
+    <button mat-icon-button routerLink="/meal-planner" matTooltip="Back to meal plans">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+
+    @if (plan()) {
+      <div class="plan-title-row">
+        <div class="plan-title-group">
+          <h1>{{ plan()!.name }}</h1>
+          @if (plan()!.description) {
+            <p class="plan-description">{{ plan()!.description }}</p>
+          }
+        </div>
+        @if (isOwner()) {
+          <button mat-icon-button (click)="openEditDialog()" matTooltip="Edit plan details">
+            <mat-icon>edit</mat-icon>
+          </button>
+        }
+      </div>
+    } @else if (loading()) {
+      <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
+    }
+  </div>
+
+  @if (plan()) {
+    <!-- Collaborators section -->
+    <div class="collaborators-section">
+      <div class="collaborators-header">
+        <mat-icon>group</mat-icon>
+        <span class="section-label">Collaborators</span>
+      </div>
+
+      <div class="collaborators-list">
+        <span class="owner-chip">
+          <mat-icon>person</mat-icon>
+          {{ plan()!.ownerEmail }}
+          <span class="owner-badge">owner</span>
+        </span>
+
+        @for (email of plan()!.collaboratorEmails; track email) {
+          <span class="collaborator-chip">
+            <mat-icon>person_outline</mat-icon>
+            {{ email }}
+            @if (isOwner()) {
+              <button mat-icon-button class="remove-chip-btn"
+                [disabled]="removingEmail() === email"
+                (click)="removeCollaborator(email)"
+                matTooltip="Remove collaborator">
+                @if (removingEmail() === email) {
+                  <mat-progress-spinner mode="indeterminate" diameter="12"></mat-progress-spinner>
+                } @else {
+                  <mat-icon>close</mat-icon>
+                }
+              </button>
+            }
+          </span>
+        }
+      </div>
+
+      @if (isOwner()) {
+        <div class="add-collaborator-row">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="email-field">
+            <mat-label>Add collaborator by email</mat-label>
+            <input matInput type="email" [ngModel]="newCollaboratorEmail()"
+              (ngModelChange)="newCollaboratorEmail.set($event)"
+              placeholder="colleague@example.com"
+              (keydown.enter)="addCollaborator()">
+            <mat-icon matSuffix>mail_outline</mat-icon>
+          </mat-form-field>
+          <button mat-raised-button color="primary"
+            [disabled]="!newCollaboratorEmail().trim() || addingCollaborator()"
+            (click)="addCollaborator()">
+            @if (addingCollaborator()) {
+              <mat-progress-spinner mode="indeterminate" diameter="18"></mat-progress-spinner>
+            } @else {
+              <mat-icon>person_add</mat-icon>
+            }
+            Add
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Calendar navigation -->
+    <div class="calendar-nav">
+      <button mat-icon-button (click)="prevMonth()" matTooltip="Previous month">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <h2 class="month-label">{{ monthLabel() }}</h2>
+      <button mat-icon-button (click)="nextMonth()" matTooltip="Next month">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+      <button mat-stroked-button class="today-btn" (click)="goToToday()">Today</button>
+    </div>
+
+    <!-- Desktop calendar grid -->
+    <div class="calendar-grid desktop-calendar">
+      @for (day of weekdays; track day) {
+        <div class="weekday-header">{{ day }}</div>
+      }
+
+      @for (day of calendarDays(); track day.dateKey) {
+        <div class="calendar-cell"
+          [class.other-month]="!day.isCurrentMonth"
+          [class.today]="day.isToday"
+          (click)="day.isCurrentMonth && openDayDialog(day.dateKey)">
+          <div class="cell-header">
+            <span class="day-number">{{ day.date.getDate() }}</span>
+          </div>
+
+          <div class="cell-entries">
+            @for (entry of getEntriesForDay(day.dateKey); track entry.id) {
+              <div class="meal-entry" [class.recipe-entry]="entry.type === 'recipe'" [class.custom-entry]="entry.type === 'custom'">
+                @if (entry.type === 'recipe') {
+                  @if (entry.recipeImage) {
+                    <img class="entry-thumb" [src]="entry.recipeImage" [alt]="entry.recipeName">
+                  } @else {
+                    <span class="entry-icon"><mat-icon>restaurant</mat-icon></span>
+                  }
+                  <span class="entry-name">{{ entry.recipeName }}</span>
+                } @else {
+                  <span class="entry-icon"><mat-icon>edit_note</mat-icon></span>
+                  <span class="entry-name">{{ entry.customText }}</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Mobile list view -->
+    <div class="mobile-list">
+      <div class="add-mobile-row">
+        <p class="mobile-hint">Tap a date to add a meal</p>
+        <!-- Month quick-add: pick date via native date input on mobile -->
+      </div>
+
+      @for (day of calendarDays(); track day.dateKey) {
+        @if (day.isCurrentMonth) {
+          <div class="mobile-day-row" [class.today]="day.isToday" (click)="openDayDialog(day.dateKey)">
+            <div class="mobile-day-header">
+              <span class="mobile-day-label" [class.today-label]="day.isToday">
+                {{ day.date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) }}
+              </span>
+              <mat-icon class="mobile-day-chevron">chevron_right</mat-icon>
+            </div>
+            @if (getEntriesForDay(day.dateKey).length > 0) {
+              <div class="mobile-entries">
+                @for (entry of getEntriesForDay(day.dateKey); track entry.id) {
+                  <div class="meal-entry" [class.recipe-entry]="entry.type === 'recipe'" [class.custom-entry]="entry.type === 'custom'">
+                    @if (entry.type === 'recipe') {
+                      @if (entry.recipeImage) {
+                        <img class="entry-thumb" [src]="entry.recipeImage" [alt]="entry.recipeName">
+                      } @else {
+                        <span class="entry-icon"><mat-icon>restaurant</mat-icon></span>
+                      }
+                      <span class="entry-name">{{ entry.recipeName }}</span>
+                    } @else {
+                      <span class="entry-icon"><mat-icon>edit_note</mat-icon></span>
+                      <span class="entry-name">{{ entry.customText }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

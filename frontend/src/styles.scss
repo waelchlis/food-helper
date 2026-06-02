@@ -188,3 +188,119 @@ html.dark-mode .mat-mdc-dialog-container {
 .mat-mdc-option:hover .autocomplete-delete-btn {
   opacity: 1;
 }
+
+/* ── Meal Planner dark mode overrides ─────────────────────────────────────── */
+
+html.dark-mode .meal-planner-container {
+  .header-section h1 {
+    color: #e0d9f5;
+  }
+
+  .empty-state {
+    color: rgba(224, 217, 245, 0.85);
+  }
+}
+
+html.dark-mode .plan-card {
+  .plan-description {
+    color: #a78bca !important;
+  }
+
+  .collaborator-info {
+    color: #a78bca !important;
+  }
+
+  mat-card-actions {
+    border-top-color: #3d3554 !important;
+  }
+}
+
+html.dark-mode .meal-plan-detail-container {
+  .page-header .plan-title-row .plan-title-group {
+    h1 { color: #e0d9f5; }
+    .plan-description { color: #a78bca; }
+  }
+
+  .collaborators-section {
+    background: rgba(30, 24, 50, 0.55);
+
+    .collaborators-header { color: #c084fc; }
+
+    .owner-chip {
+      background: rgba(192, 132, 252, 0.15);
+      color: #e0d9f5;
+    }
+
+    .collaborator-chip {
+      background: rgba(255, 255, 255, 0.06);
+      color: #c9b8e8;
+      border-color: #3d3554;
+    }
+  }
+
+  .calendar-nav .month-label { color: #e0d9f5; }
+
+  .desktop-calendar {
+    .weekday-header { color: #a78bca; }
+
+    .calendar-cell {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+
+      &:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.15); }
+
+      &.other-month { background: rgba(0, 0, 0, 0.25); border-color: transparent; }
+
+      &.today {
+        background: rgba(192, 132, 252, 0.12);
+        border-color: rgba(192, 132, 252, 0.5) !important;
+
+        .day-number { color: #c084fc !important; }
+      }
+
+      .cell-header .day-number { color: #c9b8e8; }
+    }
+  }
+
+  .mobile-list {
+    .mobile-day-row .mobile-day-header {
+      background: rgba(255, 255, 255, 0.05);
+
+      .mobile-day-label { color: #c9b8e8; }
+      .today-label { color: #c084fc !important; }
+    }
+
+    .mobile-day-row.today .mobile-day-header {
+      background: rgba(192, 132, 252, 0.1);
+
+      .today-label { color: #c084fc !important; }
+    }
+
+    .mobile-entries { background: rgba(255, 255, 255, 0.03); }
+  }
+}
+
+html.dark-mode .meal-entry {
+  &.recipe-entry {
+    background: rgba(192, 132, 252, 0.1);
+    border-color: rgba(192, 132, 252, 0.25);
+  }
+
+  &.custom-entry {
+    background: rgba(134, 239, 172, 0.08);
+    border-color: rgba(134, 239, 172, 0.2);
+  }
+
+  .entry-name { color: #c9b8e8; }
+}
+
+/* Add-meal dialog dark mode */
+html.dark-mode .add-meal-dialog {
+  .recipe-row {
+    border-color: #3d3554;
+    color: #c9b8e8;
+
+    &:hover { background: #2d2640; }
+  }
+}
+

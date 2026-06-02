@@ -1,0 +1,77 @@
+<h2 mat-dialog-title>
+  <mat-icon>restaurant</mat-icon>
+  Add meal – {{ formatDate(data.date) }}
+</h2>
+
+<mat-dialog-content>
+  <mat-tab-group animationDuration="150ms">
+    <!-- Tab 1: Existing Recipe -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">restaurant_menu</mat-icon>
+        Existing Recipe
+      </ng-template>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
+        <mat-label>Search recipes</mat-label>
+        <input matInput [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+          placeholder="Type to filter..." autofocus>
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      @if (loadingRecipes()) {
+        <div class="loading-recipes">
+          <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
+        </div>
+      } @else if (filteredRecipes().length === 0) {
+        <p class="no-results">No recipes match your search.</p>
+      } @else {
+        <div class="recipe-list">
+          @for (recipe of filteredRecipes(); track recipe.id) {
+            <button class="recipe-row" (click)="selectRecipe(recipe)">
+              @if (recipe.image) {
+                <img class="recipe-thumb-sm" [src]="recipe.image" [alt]="recipe.name">
+              } @else {
+                <div class="recipe-thumb-sm no-image">
+                  <mat-icon>restaurant</mat-icon>
+                </div>
+              }
+              <span class="recipe-row-name">{{ recipe.name }}</span>
+              @if (recipe.prepTime + recipe.cookTime > 0) {
+                <span class="recipe-row-time">
+                  <mat-icon>schedule</mat-icon>
+                  {{ recipe.prepTime + recipe.cookTime }} min
+                </span>
+              }
+            </button>
+          }
+        </div>
+      }
+    </mat-tab>
+
+    <!-- Tab 2: Custom Entry -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">edit_note</mat-icon>
+        Custom Entry
+      </ng-template>
+
+      <mat-form-field appearance="outline" class="full-width custom-field">
+        <mat-label>Custom meal name</mat-label>
+        <textarea matInput [ngModel]="customText()" (ngModelChange)="customText.set($event)"
+          maxlength="500" rows="3" placeholder="e.g. Grandma's pasta or Takeout pizza"></textarea>
+        <mat-hint align="end">{{ customText().length }}/500</mat-hint>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" class="add-btn"
+        [disabled]="!customText().trim()" (click)="submitCustom()">
+        <mat-icon>add</mat-icon>
+        Add to plan
+      </button>
+    </mat-tab>
+  </mat-tab-group>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+</mat-dialog-actions>

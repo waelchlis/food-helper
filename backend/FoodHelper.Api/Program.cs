@@ -80,6 +80,7 @@ if (!string.IsNullOrWhiteSpace(firebase.ProjectId))
         builder.Services.AddSingleton<IAdminStore, FirestoreAdminStore>();
         builder.Services.AddSingleton<IIngredientWordStore, FirestoreIngredientWordStore>();
         builder.Services.AddSingleton<ICategoryStore, FirestoreCategoryStore>();
+        builder.Services.AddSingleton<IMealPlanStore, FirestoreMealPlanStore>();
 
         var storageBucket = builder.Configuration.GetValue<string>("Storage:BucketName");
         if (!string.IsNullOrWhiteSpace(storageBucket))
@@ -102,6 +103,7 @@ if (!string.IsNullOrWhiteSpace(firebase.ProjectId))
         builder.Services.AddSingleton<IImageStore, InMemoryImageStore>();
         builder.Services.AddSingleton<IIngredientWordStore, InMemoryIngredientWordStore>();
         builder.Services.AddSingleton<ICategoryStore, InMemoryCategoryStore>();
+        builder.Services.AddSingleton<IMealPlanStore, InMemoryMealPlanStore>();
         Console.WriteLine($"Firestore initialization failed: {ex.Message}. Falling back to in-memory stores.");
     }
 }
@@ -113,6 +115,7 @@ else
     builder.Services.AddSingleton<IImageStore, InMemoryImageStore>();
     builder.Services.AddSingleton<IIngredientWordStore, InMemoryIngredientWordStore>();
     builder.Services.AddSingleton<ICategoryStore, InMemoryCategoryStore>();
+    builder.Services.AddSingleton<IMealPlanStore, InMemoryMealPlanStore>();
 }
 
 var app = builder.Build();

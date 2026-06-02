@@ -18,6 +18,12 @@
         <mat-icon matListItemIcon>donut_large</mat-icon>
         <span>Wheel of Fortune</span>
       </a>
+      @if (authService.isAuthenticated()) {
+        <a mat-list-item routerLink="/meal-planner" (click)="sidenav.close()">
+          <mat-icon matListItemIcon>calendar_month</mat-icon>
+          <span>Meal Planner</span>
+        </a>
+      }
       @if (authService.isAdmin()) {
         <a mat-list-item routerLink="/admin" (click)="sidenav.close()">
           <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
@@ -49,6 +55,12 @@
         <mat-icon>donut_large</mat-icon>
         <span class="nav-label">Wheel of Fortune</span>
       </button>
+      @if (authService.isAuthenticated()) {
+        <button mat-button routerLink="/meal-planner" class="nav-btn desktop-nav">
+          <mat-icon>calendar_month</mat-icon>
+          <span class="nav-label">Meal Planner</span>
+        </button>
+      }
       @if (authService.isAdmin()) {
         <button mat-button routerLink="/admin" class="nav-btn desktop-nav">
           <mat-icon>admin_panel_settings</mat-icon>

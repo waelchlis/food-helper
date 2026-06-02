@@ -6,6 +6,8 @@ import { RecipeFormComponent } from './components/recipe-form/recipe-form';
 import { ShoppingListComponent } from './components/shopping-list/shopping-list';
 import { AdminComponent } from './components/admin/admin';
 import { WheelOfFortuneComponent } from './components/wheel-of-fortune/wheel-of-fortune';
+import { MealPlannerComponent } from './components/meal-planner/meal-planner';
+import { MealPlanDetailComponent } from './components/meal-plan-detail/meal-plan-detail';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 
@@ -49,6 +51,16 @@ export const routes: Routes = [
     path: 'admin',
     component: AdminComponent,
     canActivate: [adminGuard],
+  },
+  {
+    path: 'meal-planner',
+    component: MealPlannerComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'meal-planner/:id',
+    component: MealPlanDetailComponent,
+    canActivate: [authGuard],
   },
   {
     path: '**',
