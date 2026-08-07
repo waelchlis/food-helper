@@ -22,6 +22,10 @@ public sealed class AddMealEntryRequest
     [MaxLength(2048)]
     public string? RecipeImage { get; set; }
 
+    /// <summary>Optional override; defaults to the referenced recipe's own Servings when omitted.</summary>
+    [Range(1, 500)]
+    public int? Servings { get; set; }
+
     [MaxLength(500)]
     public string? CustomText { get; set; }
 }

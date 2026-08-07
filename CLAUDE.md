@@ -20,6 +20,9 @@ Backend uses a project-local SDK at `./.dotnet/dotnet` (see `global.json`) — p
 # Build backend
 ./.dotnet/dotnet build backend/FoodHelper.slnx
 
+# Run backend tests (xUnit; in-memory store contract tests + WebApplicationFactory controller tests)
+./.dotnet/dotnet test backend/FoodHelper.slnx
+
 # Frontend install / dev server (http://localhost:4200)
 cd frontend && npm install && npm start
 
@@ -34,7 +37,11 @@ cd frontend && npm test
 # or the VS Code task "dev: start all"
 ```
 
-There is currently no backend test project — only the frontend has `*.spec.ts` tests.
+**⚠️ `appsettings.Development.json` contains the real production Firebase project id and credentials path.** Running the backend with `ASPNETCORE_ENVIRONMENT=Development` (the default for `dotnet run`, via `Properties/launchSettings.json`) connects to the *real* Firestore/Storage instance if the credentials file is present on the machine — it is not a safe local sandbox by default. For local backend work that must not touch real data (e.g. generating the OpenAPI spec, ad-hoc manual testing), run with an empty `Firebase:ProjectId` instead, e.g.:
+```bash
+ASPNETCORE_ENVIRONMENT=Production ./.dotnet/dotnet run --project backend/FoodHelper.Api --no-launch-profile
+```
+`--no-launch-profile` is required — otherwise `launchSettings.json` re-forces `ASPNETCORE_ENVIRONMENT=Development` regardless of what's passed on the command line or set in the shell. Verify with `curl localhost:5000/health` — it reports `storageMode` (`"inmemory"` or `"firestore"`) precisely so this is easy to check before doing anything further. `FoodHelper.Api.Tests` (via `CustomWebApplicationFactory`) already does this safely for automated tests — see that file for the pattern.
 
 To run a single frontend spec file, pass it through the Angular test builder, e.g.:
 ```bash

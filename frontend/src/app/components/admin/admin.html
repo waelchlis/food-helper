@@ -109,4 +109,39 @@
       <p class="empty-state">No categories yet. Add one above.</p>
     }
   </div>
+
+  <!-- Bulk Import / Export -->
+  <div class="section-header">
+    <h2>Bulk Import / Export</h2>
+  </div>
+
+  <mat-card class="add-admin-card">
+    <mat-card-content>
+      <div class="import-export-actions">
+        <button mat-flat-button color="primary" (click)="exportRecipes()">
+          <mat-icon>download</mat-icon>
+          Export All Recipes (JSON)
+        </button>
+        <button mat-stroked-button (click)="importFileInput.click()" [disabled]="importing()">
+          <mat-icon>upload</mat-icon>
+          {{ importing() ? 'Importing…' : 'Import Recipes (JSON)' }}
+        </button>
+        <input #importFileInput type="file" accept="application/json" hidden (change)="onImportFileSelected($event)">
+      </div>
+
+      @if (importResults()) {
+        <div class="import-results">
+          @for (result of importResults(); track $index) {
+            <div class="import-result-row" [class.success]="result.success" [class.failure]="!result.success">
+              <mat-icon>{{ result.success ? 'check_circle' : 'error' }}</mat-icon>
+              <span>{{ result.name }}</span>
+              @if (!result.success) {
+                <span class="import-error">{{ result.error }}</span>
+              }
+            </div>
+          }
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
 </div>

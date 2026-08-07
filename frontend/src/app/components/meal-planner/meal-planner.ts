@@ -13,6 +13,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MealPlan, MealPlanService } from '../../services/meal-plan';
 import { EditMealPlanDialogComponent, EditMealPlanDialogData, EditMealPlanDialogResult } from '../edit-meal-plan-dialog/edit-meal-plan-dialog';
+import { ConfirmDialogService } from '../../shared/confirm-dialog';
 
 @Component({
   selector: 'app-meal-planner',
@@ -39,6 +40,7 @@ export class MealPlannerComponent implements OnInit {
   private readonly mealPlanService = inject(MealPlanService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly mealPlans = this.mealPlanService.allMealPlans;
   loading = signal(true);
@@ -73,8 +75,15 @@ export class MealPlannerComponent implements OnInit {
     });
   }
 
-  deletePlan(plan: MealPlan): void {
-    if (!confirm(`Delete "${plan.name}"? This cannot be undone.`)) return;
+  async deletePlan(plan: MealPlan): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Delete meal plan',
+      message: `Delete "${plan.name}"? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+    });
+    if (!confirmed) return;
+
     this.deletingId.set(plan.id);
     this.mealPlanService.deleteMealPlan(plan.id).subscribe({
       next: () => {

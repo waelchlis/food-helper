@@ -10,10 +10,15 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
-import { RecipeService } from '../../services/recipe';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { debounceTime, Subject, switchMap } from 'rxjs';
+import { RecipeService, Recipe } from '../../services/recipe';
 import { RecipeCardComponent } from '../recipe-card/recipe-card';
 import { AuthService } from '../../services/auth';
 import { CategoryService } from '../../services/category';
+import { FavoriteService } from '../../services/favorite';
+import { ConfirmDialogService } from '../../shared/confirm-dialog';
+import { TIME_OPTIONS } from '../../shared/time-options';
 
 @Component({
   selector: 'app-recipe-list',
@@ -30,6 +35,7 @@ import { CategoryService } from '../../services/category';
     MatInputModule,
     MatSelectModule,
     MatDividerModule,
+    MatSnackBarModule,
     RecipeCardComponent,
   ],
   templateUrl: './recipe-list.html',
@@ -41,72 +47,97 @@ export class RecipeListComponent implements OnInit {
   selectedCategory = signal<string>('');
   selectedDietType = signal<string[]>([]);
   maxTotalTime = signal<number>(0);
+  sort = signal<'newest' | 'name' | 'totalTime'>('newest');
+  showFavoritesOnly = signal<boolean>(false);
 
-  readonly timeOptions = [
-    { label: '15 minutes', value: 15 },
-    { label: '30 minutes', value: 30 },
-    { label: '45 minutes', value: 45 },
-    { label: '60 minutes', value: 60 },
-    { label: '90 minutes', value: 90 },
-  ];
+  loading = signal<boolean>(false);
+  loadingMore = signal<boolean>(false);
+  results = signal<Recipe[]>([]);
+  nextCursor = signal<string | null>(null);
+
+  readonly timeOptions = TIME_OPTIONS;
+
+  private readonly queryChanges = new Subject<void>();
 
   allIngredients = computed(() => this.recipeService.allIngredients());
   allCategories = computed(() => this.categoryService.allCategories());
 
-  filteredRecipes = computed(() => {
-    const query = this.searchQuery();
-    const ingredient = this.selectedIngredient();
-    const categoryId = this.selectedCategory();
-    const maxTime = this.maxTotalTime();
-    const dietType = this.selectedDietType();
-    const recipes = this.recipeService.getRecipes();
-
-    let results: typeof recipes;
-    if (query) {
-      results = this.recipeService.searchRecipes(query);
-    } else if (ingredient) {
-      results = this.recipeService.filterByIngredient(ingredient);
-    } else if (categoryId) {
-      results = this.recipeService.filterByCategory(categoryId);
-    } else {
-      results = recipes;
+  displayedRecipes = computed(() => {
+    if (!this.showFavoritesOnly()) {
+      return this.results();
     }
-
-    if (maxTime > 0) {
-      results = results.filter(r => r.prepTime + r.cookTime <= maxTime);
-    }
-
-    if (dietType.length > 0) {
-      results = results.filter(r => r.dietType !== undefined && dietType.includes(r.dietType));
-    }
-
-    return results;
+    const favoriteIds = this.favoriteService.favoriteIds();
+    return this.results().filter(r => favoriteIds.has(r.id));
   });
 
   constructor(
     protected recipeService: RecipeService,
     public authService: AuthService,
     protected categoryService: CategoryService,
+    protected favoriteService: FavoriteService,
+    private confirmDialog: ConfirmDialogService,
+    private snackBar: MatSnackBar,
   ) {}
 
   ngOnInit(): void {
-    this.recipeService.refreshRecipes().subscribe();
     this.categoryService.loadAll();
+
+    this.queryChanges
+      .pipe(
+        debounceTime(250),
+        switchMap(() => {
+          this.loading.set(true);
+          return this.recipeService.queryRecipes(this.buildQuery());
+        })
+      )
+      .subscribe({
+        next: page => {
+          this.results.set(page.items);
+          this.nextCursor.set(page.nextCursor);
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
+
+    this.runQuery();
   }
 
-  onSearchChange(): void {
-    this.selectedIngredient.set('');
-    this.selectedCategory.set('');
+  private buildQuery(cursor?: string) {
+    return {
+      q: this.searchQuery() || undefined,
+      ingredient: this.selectedIngredient() || undefined,
+      categoryId: this.selectedCategory() || undefined,
+      dietType: this.selectedDietType().length === 1 ? this.selectedDietType()[0] : undefined,
+      maxTotalTime: this.maxTotalTime() || undefined,
+      sort: this.sort(),
+      cursor,
+      pageSize: 24,
+    };
   }
 
-  onIngredientChange(): void {
-    this.searchQuery.set('');
-    this.selectedCategory.set('');
+  runQuery(): void {
+    this.queryChanges.next();
   }
 
-  onCategoryChange(): void {
-    this.searchQuery.set('');
-    this.selectedIngredient.set('');
+  loadMore(): void {
+    const cursor = this.nextCursor();
+    if (!cursor || this.loadingMore()) return;
+
+    this.loadingMore.set(true);
+    this.recipeService.queryRecipes(this.buildQuery(cursor)).subscribe({
+      next: page => {
+        this.results.set([...this.results(), ...page.items]);
+        this.nextCursor.set(page.nextCursor);
+        this.loadingMore.set(false);
+      },
+      error: () => this.loadingMore.set(false),
+    });
+  }
+
+  toggleDietType(type: 'vegan' | 'vegetarian'): void {
+    const current = this.selectedDietType();
+    this.selectedDietType.set(current.includes(type) ? current.filter(t => t !== type) : [...current, type]);
+    this.runQuery();
   }
 
   clearFilters(): void {
@@ -115,16 +146,41 @@ export class RecipeListComponent implements OnInit {
     this.selectedCategory.set('');
     this.selectedDietType.set([]);
     this.maxTotalTime.set(0);
+    this.sort.set('newest');
+    this.runQuery();
   }
 
-  deleteRecipe(id: string): void {
+  hasActiveFilters(): boolean {
+    return !!(this.searchQuery() || this.selectedIngredient() || this.selectedCategory() || this.selectedDietType().length || this.maxTotalTime());
+  }
+
+  toggleFavorite(recipeId: string): void {
+    const recipe = this.results().find(r => r.id === recipeId);
+    if (recipe) {
+      this.favoriteService.toggle(recipe);
+    }
+  }
+
+  async deleteRecipe(id: string): Promise<void> {
     if (!this.authService.isAuthenticated()) {
       return;
     }
 
-    if (confirm('Are you sure you want to delete this recipe?')) {
-      this.recipeService.deleteRecipe(id).subscribe();
-    }
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Delete recipe',
+      message: 'Are you sure you want to delete this recipe? This cannot be undone.',
+      confirmLabel: 'Delete',
+      danger: true,
+    });
+    if (!confirmed) return;
+
+    this.recipeService.deleteRecipe(id).subscribe(success => {
+      if (success) {
+        this.results.set(this.results().filter(r => r.id !== id));
+        this.snackBar.open('Recipe deleted.', undefined, { duration: 2500 });
+      } else {
+        this.snackBar.open('Failed to delete recipe.', 'Dismiss', { duration: 4000 });
+      }
+    });
   }
 }
-

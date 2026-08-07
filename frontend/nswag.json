@@ -1,0 +1,27 @@
+{
+  "runtime": "Net80",
+  "documentGenerator": {
+    "fromDocument": {
+      "json": null,
+      "url": "openapi/food-helper-api.json",
+      "output": null
+    }
+  },
+  "codeGenerators": {
+    "openApiToTypeScriptClient": {
+      "template": "Fetch",
+      "generateClientClasses": false,
+      "generateClientInterfaces": false,
+      "generateDtoTypes": true,
+      "operationGenerationMode": "SingleClientFromOperationId",
+      "markOptionalProperties": true,
+      "generateCloneMethod": false,
+      "typeStyle": "Interface",
+      "enumStyle": "Enum",
+      "dateTimeType": "String",
+      "nullValue": "Undefined",
+      "typeScriptVersion": 5.0,
+      "output": "src/app/api/generated/api-types.ts"
+    }
+  }
+}

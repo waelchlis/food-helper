@@ -7,6 +7,14 @@
         Back to Recipes
       </button>
       <div class="action-buttons-right">
+        @if (authService.isAuthenticated()) {
+          <button mat-icon-button (click)="toggleFavorite()" [attr.aria-label]="favoriteService.isFavorite(recipe()!.id) ? 'Remove from favorites' : 'Add to favorites'">
+            <mat-icon>{{ favoriteService.isFavorite(recipe()!.id) ? 'favorite' : 'favorite_border' }}</mat-icon>
+          </button>
+        }
+        <button mat-icon-button (click)="shareRecipe()" aria-label="Copy share link">
+          <mat-icon>share</mat-icon>
+        </button>
         @if (authService.isAdmin()) {
           <button mat-raised-button color="primary" [routerLink]="['/recipe', recipe()!.id, 'edit']">
             <mat-icon>edit</mat-icon>
@@ -19,10 +27,25 @@
         </button>
       </div>
     </div>
-    <!-- Header with image -->
+    <!-- Header with image gallery -->
     <div class="recipe-header">
-      @if (recipe()!.image) {
-        <img [src]="recipe()!.image" [alt]="recipe()!.name" class="recipe-image">
+      @if (recipe()!.images && recipe()!.images.length > 0) {
+        <div class="image-gallery">
+          <img [src]="recipe()!.images[activeImageIndex()]" [alt]="recipe()!.name" class="recipe-image">
+          @if (recipe()!.images.length > 1) {
+            <button mat-icon-button class="gallery-nav prev" (click)="prevImage()" aria-label="Previous image">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <button mat-icon-button class="gallery-nav next" (click)="nextImage()" aria-label="Next image">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+            <div class="gallery-dots">
+              @for (img of recipe()!.images; track $index; let i = $index) {
+                <button class="dot" [class.active]="i === activeImageIndex()" (click)="activeImageIndex.set(i)" [attr.aria-label]="'Show image ' + (i + 1)"></button>
+              }
+            </div>
+          }
+        </div>
       } @else {
         <div class="no-image">
           <mat-icon>restaurant</mat-icon>
@@ -43,6 +66,12 @@
       <p class="description">{{ recipe()!.description }}</p>
       @if (recipe()!.creatorName) {
         <p class="creator-info">Created by: {{ recipe()!.creatorName }}, {{ recipe()!.createdAt | date:'longDate' }}</p>
+      }
+      @if (recipe()!.note) {
+        <div class="recipe-note">
+          <mat-icon>info</mat-icon>
+          <p>{{ recipe()!.note }}</p>
+        </div>
       }
 
       <!-- Meta Information -->
@@ -100,7 +129,7 @@
           <div class="ingredients-list">
             @for (ingredient of scaledIngredients(); track ingredient.id) {
               <div class="ingredient-item">
-                <span class="amount">{{ ingredient.amount.toFixed(2) }}</span>
+                <span class="amount">{{ ingredient.amount | number:'1.0-2' }}</span>
                 <span class="unit">{{ ingredient.unit }}</span>
                 <span class="name">{{ ingredient.name }}</span>
               </div>
@@ -143,6 +172,31 @@
           </mat-card-content>
         </mat-card>
       }
+
+      <!-- Similar Recipes -->
+      @if (similarRecipes().length > 0) {
+        <mat-card class="section-card similar-card">
+          <mat-card-header>
+            <mat-card-title>You might also like</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="similar-list">
+              @for (similar of similarRecipes(); track similar.id) {
+                <a class="similar-item" [routerLink]="['/recipe', similar.id]">
+                  @if (similar.images && similar.images.length > 0) {
+                    <img [src]="similar.images[0]" [alt]="similar.name">
+                  } @else {
+                    <div class="no-image-sm">
+                      <mat-icon>restaurant</mat-icon>
+                    </div>
+                  }
+                  <span>{{ similar.name }}</span>
+                </a>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
     </div>
   </div>
 } @else {
@@ -154,4 +208,3 @@
     </button>
   </div>
 }
-

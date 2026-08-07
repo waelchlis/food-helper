@@ -9,4 +9,6 @@ public sealed class InMemoryImageStore : IImageStore
         var base64 = Convert.ToBase64String(ms.ToArray());
         return $"data:{contentType};base64,{base64}";
     }
+
+    public Task DeleteAsync(string imageUrl, CancellationToken cancellationToken) => Task.CompletedTask;
 }

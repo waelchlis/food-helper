@@ -32,14 +32,26 @@ public sealed class Recipe
     [FirestoreProperty("tips")]
     public List<string> Tips { get; set; } = [];
 
+    [FirestoreProperty("images")]
+    public List<string> Images { get; set; } = [];
+
+    /// <summary>
+    /// Back-compat only: recipes written before the single-Image-to-Images migration still have
+    /// data under the old "image" field. FirestoreRecipeStore.Map lazily migrates this into
+    /// Images on read so no explicit migration script needs to run. New writes never populate this.
+    /// </summary>
     [FirestoreProperty("image")]
-    public string? Image { get; set; }
+    public string? LegacyImage { get; set; }
 
     [FirestoreProperty("categoryId")]
     public string? CategoryId { get; set; }
 
     [FirestoreProperty("dietType")]
     public string? DietType { get; set; }
+
+    /// <summary>Public note from the recipe's creator/admin, visible to everyone viewing the recipe.</summary>
+    [FirestoreProperty("note")]
+    public string? Note { get; set; }
 
     [FirestoreProperty("creatorName")]
     public string CreatorName { get; set; } = string.Empty;

@@ -1,8 +1,8 @@
 <mat-card class="recipe-card">
   <a class="card-link" [routerLink]="['/recipe', recipe.id]" [attr.aria-label]="recipe.name"></a>
   <div class="image-container">
-    @if (recipe.image) {
-      <img mat-card-image [src]="recipe.image" [alt]="recipe.name">
+    @if (recipe.images && recipe.images.length > 0) {
+      <img mat-card-image [src]="recipe.images[0]" [alt]="recipe.name">
     } @else {
       <div class="no-image">
         <mat-icon>restaurant</mat-icon>
@@ -14,8 +14,14 @@
           [alt]="recipe.dietType">
       </div>
     }
+    @if (showFavoriteToggle) {
+      <button mat-icon-button class="favorite-toggle" (click)="onToggleFavorite($event)"
+        [attr.aria-label]="isFavorite ? 'Remove from favorites' : 'Add to favorites'">
+        <mat-icon>{{ isFavorite ? 'favorite' : 'favorite_border' }}</mat-icon>
+      </button>
+    }
   </div>
-  
+
   <mat-card-header>
     <mat-card-title>{{ recipe.name }}</mat-card-title>
   </mat-card-header>

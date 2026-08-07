@@ -5,6 +5,7 @@ import { provideRouter } from '@angular/router';
 import { RecipeListComponent } from './recipe-list';
 import { RecipeService } from '../../services/recipe';
 import { AuthService } from '../../services/auth';
+import { FavoriteService } from '../../services/favorite';
 
 describe('RecipeListComponent', () => {
   let component: RecipeListComponent;
@@ -20,15 +21,18 @@ describe('RecipeListComponent', () => {
           useValue: {
             getRecipes: () => [],
             refreshRecipes: () => of([]),
-            searchRecipes: () => [],
-            filterByIngredient: () => [],
+            queryRecipes: () => of({ items: [], nextCursor: null }),
             allIngredients: () => [],
             deleteRecipe: () => of(true),
           },
         },
         {
           provide: AuthService,
-          useValue: { isAuthenticated: () => false },
+          useValue: { isAuthenticated: () => false, isAdmin: () => false },
+        },
+        {
+          provide: FavoriteService,
+          useValue: { isFavorite: () => false, favoriteIds: () => new Set(), toggle: () => {} },
         },
       ],
     }).compileComponents();

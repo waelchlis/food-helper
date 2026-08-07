@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, catchError, map, of, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { ShoppingListItem } from './shopping-list';
 
 export interface MealEntry {
   id: string;
@@ -10,6 +11,8 @@ export interface MealEntry {
   recipeId?: string;
   recipeName?: string;
   recipeImage?: string;
+  /** Planned serving count for this entry; defaults to the recipe's own Servings when added. */
+  servings?: number;
   customText?: string;
   createdAt: string;
 }
@@ -31,6 +34,7 @@ export interface AddMealEntryPayload {
   recipeId?: string;
   recipeName?: string;
   recipeImage?: string;
+  servings?: number;
   customText?: string;
 }
 
@@ -109,6 +113,10 @@ export class MealPlanService {
     return this.http.post<MealPlan>(`${this.apiUrl}/${planId}/collaborators`, { email }).pipe(
       tap(plan => this.mealPlans.set(this.upsertInMemory(this.mealPlans(), plan)))
     );
+  }
+
+  generateShoppingList(planId: string, from: string, to: string): Observable<ShoppingListItem[]> {
+    return this.http.post<ShoppingListItem[]>(`${this.apiUrl}/${planId}/shopping-list`, { from, to });
   }
 
   removeCollaborator(planId: string, email: string): Observable<MealPlan> {

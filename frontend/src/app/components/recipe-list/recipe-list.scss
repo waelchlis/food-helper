@@ -83,6 +83,10 @@
       align-self: flex-end;
       margin-bottom: calc(1.25em + 8px);
       font-size: 0.85rem;
+
+      &.active {
+        background: rgba(255, 255, 255, 0.25);
+      }
     }
 
     // Ensure form-field label notch background matches the section so the
@@ -121,5 +125,11 @@
         }
       }
     }
+  }
+
+  .load-more {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
   }
 }

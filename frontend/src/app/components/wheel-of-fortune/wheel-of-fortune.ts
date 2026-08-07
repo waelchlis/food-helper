@@ -23,6 +23,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { RecipeService, Recipe } from '../../services/recipe';
 import { IngredientWordService } from '../../services/ingredient-word';
 import { CategoryService } from '../../services/category';
+import { TIME_OPTIONS } from '../../shared/time-options';
 
 const SEGMENT_COLORS = [
   '#ef9a9a', '#ce93d8', '#90caf9', '#80cbc4',
@@ -67,13 +68,7 @@ export class WheelOfFortuneComponent implements OnInit, AfterViewInit, OnDestroy
 
   readonly allCategories = computed(() => this.categoryService.allCategories());
 
-  readonly timeOptions = [
-    { label: '15 minutes', value: 15 },
-    { label: '30 minutes', value: 30 },
-    { label: '45 minutes', value: 45 },
-    { label: '60 minutes', value: 60 },
-    { label: '90 minutes', value: 90 },
-  ];
+  readonly timeOptions = TIME_OPTIONS;
 
   filteredRecipes = computed(() => {
     const ingredients = this.selectedIngredients();

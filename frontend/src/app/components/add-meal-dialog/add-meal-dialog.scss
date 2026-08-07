@@ -194,6 +194,29 @@ mat-tab-group {
   }
 }
 
+.servings-step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.selected-recipe-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--mat-sys-primary);
+  background: color-mix(in srgb, var(--mat-sys-primary) 8%, transparent);
+  width: 100%;
+
+  .recipe-row-name {
+    font-size: 0.95rem;
+    color: var(--mat-sys-on-surface);
+  }
+}
+
 .full-width {
   width: 100%;
 }

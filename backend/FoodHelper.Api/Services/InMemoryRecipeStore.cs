@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using FoodHelper.Api.Contracts;
 using FoodHelper.Api.Models;
 
 namespace FoodHelper.Api.Services;
@@ -31,5 +32,10 @@ public sealed class InMemoryRecipeStore : IRecipeStore
     public Task<bool> DeleteAsync(string id, CancellationToken cancellationToken)
     {
         return Task.FromResult(_recipes.TryRemove(id, out _));
+    }
+
+    public Task<RecipePage> QueryAsync(RecipeQueryParameters query, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(RecipeQueryEngine.Apply(_recipes.Values, query));
     }
 }

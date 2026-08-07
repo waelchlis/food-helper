@@ -65,15 +65,17 @@
   .item-card {
     .item-row {
       display: grid;
-      grid-template-columns: 160px 180px 1fr auto;
-      grid-template-areas: "name quantity notes delete";
+      grid-template-columns: auto 160px 180px 1fr auto;
+      grid-template-areas: "checkbox name quantity notes delete";
       align-items: center;
       gap: 1rem;
       padding: 0.5rem 1rem;
 
+      mat-checkbox     { grid-area: checkbox; }
       .item-name     { grid-area: name; }
       .item-quantity { grid-area: quantity; }
       .notes-input   { grid-area: notes; }
+      .item-summary  { grid-area: notes; color: #666; font-size: 0.9rem; }
       &> button      { grid-area: delete; }
 
       .item-name {
@@ -108,17 +110,40 @@
       }
 
       @media (max-width: 600px) {
-        grid-template-columns: 1fr auto;
+        grid-template-columns: auto 1fr auto;
         grid-template-rows: auto auto;
         grid-template-areas:
-          "name delete"
-          "quantity notes";
+          "checkbox name delete"
+          "checkbox quantity notes";
         gap: 0.5rem;
 
         .item-quantity {
           .inline-amount { width: 80px; }
         }
       }
+    }
+
+    &.checked-item {
+      opacity: 0.65;
+
+      .item-name {
+        text-decoration: line-through;
+      }
+
+      .item-row {
+        grid-template-columns: auto 1fr 1fr auto;
+        grid-template-areas: "checkbox name notes delete";
+      }
+    }
+  }
+
+  .checked-section {
+    margin-top: 2rem;
+
+    h2 {
+      font-size: 1.2rem;
+      color: #ffffff;
+      margin-bottom: 0.75rem;
     }
   }
 

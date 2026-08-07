@@ -24,6 +24,8 @@ describe('RecipeCardComponent', () => {
       cookTime: 10,
       ingredients: [],
       instructions: [],
+      tips: [],
+      images: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };

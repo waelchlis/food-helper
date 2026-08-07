@@ -17,4 +17,6 @@ public sealed class UpsertShoppingListItemRequest
 
     [MaxLength(500)]
     public string Notes { get; init; } = string.Empty;
+
+    public bool Checked { get; init; }
 }

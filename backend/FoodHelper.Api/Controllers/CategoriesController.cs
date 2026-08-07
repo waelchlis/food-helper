@@ -2,6 +2,7 @@ using FoodHelper.Api.Models;
 using FoodHelper.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace FoodHelper.Api.Controllers;
 
@@ -18,6 +19,7 @@ public sealed class CategoriesController(ICategoryStore categoryStore, IRecipeSt
 
     [HttpPost]
     [Authorize(Policy = "AdminOnly")]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<ActionResult<Category>> Add([FromBody] CategoryNameRequest request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Name))
@@ -33,6 +35,7 @@ public sealed class CategoriesController(ICategoryStore categoryStore, IRecipeSt
 
     [HttpPut("{id}")]
     [Authorize(Policy = "AdminOnly")]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<ActionResult<Category>> Rename(string id, [FromBody] CategoryNameRequest request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Name))
@@ -48,6 +51,7 @@ public sealed class CategoriesController(ICategoryStore categoryStore, IRecipeSt
 
     [HttpDelete("{id}")]
     [Authorize(Policy = "AdminOnly")]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken)
     {
         var all = await categoryStore.GetAllAsync(cancellationToken);

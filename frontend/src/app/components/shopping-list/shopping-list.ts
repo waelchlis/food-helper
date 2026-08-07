@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ShoppingListService, ShoppingListItem } from '../../services/shopping-list';
 
@@ -21,6 +22,7 @@ import { ShoppingListService, ShoppingListItem } from '../../services/shopping-l
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
+    MatCheckboxModule,
     MatDialogModule,
   ],
   templateUrl: './shopping-list.html',
@@ -31,6 +33,9 @@ export class ShoppingListComponent {
   newAmount = 1;
   newUnit = '';
   newNotes = '';
+
+  readonly activeItems = computed(() => this.shoppingListService.allItems().filter(i => !i.checked));
+  readonly checkedItems = computed(() => this.shoppingListService.allItems().filter(i => i.checked));
 
   constructor(
     public shoppingListService: ShoppingListService,
@@ -48,6 +53,10 @@ export class ShoppingListComponent {
 
   removeItem(id: string): void {
     this.shoppingListService.removeItem(id);
+  }
+
+  toggleChecked(item: ShoppingListItem): void {
+    this.shoppingListService.toggleChecked(item);
   }
 
   updateAmount(item: ShoppingListItem, value: string): void {

@@ -142,8 +142,15 @@ $mobile-bp: 768px;
   .calendar-nav {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 0.5rem;
     margin-bottom: 1rem;
+
+    .generate-list-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
 
     .month-label {
       flex: 1;

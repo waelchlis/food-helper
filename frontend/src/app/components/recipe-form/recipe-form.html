@@ -72,6 +72,13 @@
             </mat-button-toggle-group>
           </div>
         </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Note (optional, shown to everyone viewing this recipe)</mat-label>
+            <textarea matInput [ngModel]="recipe().note" (ngModelChange)="recipe.set({ ...recipe(), note: $event })" placeholder="e.g. a substitution tip or a heads-up about this recipe" rows="2"></textarea>
+          </mat-form-field>
+        </div>
       </mat-card-content>
     </mat-card>
 
@@ -203,47 +210,99 @@
       </mat-card-content>
     </mat-card>
 
-    <!-- Image Section (Optional) -->
+    <!-- Image Gallery Section (Optional) -->
     <mat-card class="form-section">
       <mat-card-header>
-        <mat-card-title>Recipe Image (Optional)</mat-card-title>
+        <mat-card-title>Recipe Images (Optional)</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div class="form-row">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Image URL</mat-label>
-            <input matInput [(ngModel)]="recipe().image" placeholder="Enter image URL...">
-          </mat-form-field>
-        </div>
-        <div class="image-upload-section">
-          <span class="upload-divider">or upload a file</span>
-          <button mat-stroked-button type="button" (click)="imageFileInput.click()">
-            <mat-icon>upload</mat-icon>
-            Choose Image
-          </button>
-          <input #imageFileInput type="file" accept="image/*" hidden (change)="onImageFileSelected($event)">
-          @if (imagePreview()) {
-            <div class="image-preview">
-              <img [src]="imagePreview()" alt="Preview">
-              <button mat-icon-button color="warn" (click)="removeSelectedImage()">
-                <mat-icon>close</mat-icon>
-              </button>
-            </div>
-          } @else if (recipe().image) {
-            <div class="image-preview">
-              <img [src]="recipe().image" alt="Current image">
-            </div>
-          }
-        </div>
+        @if (recipe().images && recipe().images!.length > 0) {
+          <div class="image-gallery-grid">
+            @for (url of recipe().images!; track url; let i = $index) {
+              <div class="gallery-thumb">
+                <img [src]="url" [alt]="'Recipe image ' + (i + 1)">
+                @if (i === 0) {
+                  <span class="cover-badge">Cover</span>
+                }
+                <div class="gallery-thumb-actions">
+                  <button mat-icon-button type="button" [disabled]="i === 0" (click)="moveExistingImage(i, -1)" aria-label="Move earlier">
+                    <mat-icon>arrow_back</mat-icon>
+                  </button>
+                  <button mat-icon-button type="button" color="warn" (click)="removeExistingImage(url)" aria-label="Remove image">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                  <button mat-icon-button type="button" [disabled]="i === recipe().images!.length - 1" (click)="moveExistingImage(i, 1)" aria-label="Move later">
+                    <mat-icon>arrow_forward</mat-icon>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (newImagePreviews().length > 0) {
+          <div class="image-gallery-grid queued">
+            @for (preview of newImagePreviews(); track $index; let i = $index) {
+              <div class="gallery-thumb">
+                <img [src]="preview" [alt]="'New image ' + (i + 1)">
+                <span class="queued-badge">Will upload on save</span>
+                <div class="gallery-thumb-actions">
+                  <button mat-icon-button type="button" color="warn" (click)="removeQueuedImage(i)" aria-label="Remove queued image">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <button mat-stroked-button type="button" (click)="imageFilesInput.click()">
+          <mat-icon>upload</mat-icon>
+          Add Images
+        </button>
+        <input #imageFilesInput type="file" accept="image/*" multiple hidden (change)="onImageFilesSelected($event)">
       </mat-card-content>
     </mat-card>
+
+    <!-- History (admin audit trail) -->
+    @if (isEditMode() && authService.isAdmin()) {
+      <mat-card class="form-section">
+        <mat-card-header>
+          <mat-card-title>
+            <button mat-button type="button" (click)="toggleHistory()">
+              <mat-icon>{{ showHistory() ? 'expand_less' : 'expand_more' }}</mat-icon>
+              Edit History
+            </button>
+          </mat-card-title>
+        </mat-card-header>
+        @if (showHistory()) {
+          <mat-card-content>
+            @if (history().length === 0) {
+              <p class="hint">No previous edits recorded.</p>
+            } @else {
+              <div class="history-list">
+                @for (revision of history(); track revision.id) {
+                  <div class="history-item">
+                    <mat-icon>history</mat-icon>
+                    <div>
+                      <strong>{{ revision.snapshot.name }}</strong>
+                      <span class="history-meta">edited by {{ revision.editorName }} on {{ revision.createdAt | date:'medium' }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </mat-card-content>
+        }
+      </mat-card>
+    }
   </div>
 
   <!-- Action Buttons -->
   <div class="action-buttons">
-    <button mat-raised-button color="primary" (click)="saveRecipe()">
+    <button mat-raised-button color="primary" (click)="saveRecipe()" [disabled]="saving()">
       <mat-icon>save</mat-icon>
-      Save Recipe
+      {{ saving() ? 'Saving…' : 'Save Recipe' }}
     </button>
     <button mat-stroked-button (click)="cancel()">
       <mat-icon>close</mat-icon>

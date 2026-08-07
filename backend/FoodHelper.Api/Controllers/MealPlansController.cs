@@ -3,14 +3,17 @@ using FoodHelper.Api.Models;
 using FoodHelper.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace FoodHelper.Api.Controllers;
 
 [ApiController]
 [Route("api/meal-plans")]
 [Authorize]
-public sealed class MealPlansController(IMealPlanStore mealPlanStore) : ControllerBase
+public sealed class MealPlansController(
+    IMealPlanStore mealPlanStore,
+    IRecipeStore recipeStore,
+    IShoppingListStore shoppingListStore) : ControllerBase
 {
     // ── Plan CRUD ────────────────────────────────────────────────────────────
 
@@ -49,6 +52,7 @@ public sealed class MealPlansController(IMealPlanStore mealPlanStore) : Controll
     }
 
     [HttpPost]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<ActionResult<MealPlan>> Create([FromBody] UpsertMealPlanRequest request, CancellationToken cancellationToken)
     {
         if (!TryResolveUser(out var ownerKey, out var userEmail, out var error))
@@ -74,6 +78,7 @@ public sealed class MealPlansController(IMealPlanStore mealPlanStore) : Controll
     }
 
     [HttpPut("{id}")]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<ActionResult<MealPlan>> Update(string id, [FromBody] UpsertMealPlanRequest request, CancellationToken cancellationToken)
     {
         if (!TryResolveUser(out var ownerKey, out _, out var error))
@@ -100,6 +105,7 @@ public sealed class MealPlansController(IMealPlanStore mealPlanStore) : Controll
     }
 
     [HttpDelete("{id}")]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken)
     {
         if (!TryResolveUser(out var ownerKey, out _, out var error))
@@ -147,6 +153,7 @@ public sealed class MealPlansController(IMealPlanStore mealPlanStore) : Controll
     }
 
     [HttpPost("{id}/entries")]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<ActionResult<MealEntry>> AddEntry(string id, [FromBody] AddMealEntryRequest request, CancellationToken cancellationToken)
     {
         if (!TryResolveUser(out var ownerKey, out var userEmail, out var error))
@@ -175,6 +182,13 @@ public sealed class MealPlansController(IMealPlanStore mealPlanStore) : Controll
             return BadRequest(new { error = "CustomText is required when Type is 'custom'." });
         }
 
+        var servings = request.Servings;
+        if (request.Type == "recipe" && servings is null && !string.IsNullOrWhiteSpace(request.RecipeId))
+        {
+            var recipe = await recipeStore.GetByIdAsync(request.RecipeId, cancellationToken);
+            servings = recipe?.Servings;
+        }
+
         var entry = new MealEntry
         {
             Id = Guid.NewGuid().ToString("n"),
@@ -183,6 +197,7 @@ public sealed class MealPlansController(IMealPlanStore mealPlanStore) : Controll
             RecipeId = request.RecipeId,
             RecipeName = request.RecipeName?.Trim(),
             RecipeImage = request.RecipeImage,
+            Servings = servings,
             CustomText = request.CustomText?.Trim(),
             CreatedAt = DateTime.UtcNow,
         };
@@ -195,6 +210,7 @@ public sealed class MealPlansController(IMealPlanStore mealPlanStore) : Controll
     }
 
     [HttpDelete("{id}/entries/{entryId}")]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<IActionResult> DeleteEntry(string id, string entryId, CancellationToken cancellationToken)
     {
         if (!TryResolveUser(out var ownerKey, out var userEmail, out var error))
@@ -217,9 +233,94 @@ public sealed class MealPlansController(IMealPlanStore mealPlanStore) : Controll
         return deleted ? NoContent() : NotFound();
     }
 
+    // ── Shopping list generation ────────────────────────────────────────────
+
+    [HttpPost("{id}/shopping-list")]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
+    public async Task<ActionResult<IReadOnlyList<ShoppingListItem>>> GenerateShoppingList(
+        string id,
+        [FromBody] GenerateShoppingListRequest request,
+        [FromHeader(Name = "X-Session-Id")] string? sessionId,
+        CancellationToken cancellationToken)
+    {
+        if (!TryResolveUser(out var ownerKey, out var userEmail, out var error))
+        {
+            return Unauthorized(new { error });
+        }
+
+        var plan = await mealPlanStore.GetByIdAsync(id, cancellationToken);
+        if (plan is null)
+        {
+            return NotFound();
+        }
+
+        if (!CanAccess(plan, ownerKey, userEmail))
+        {
+            return Forbid();
+        }
+
+        var entries = await mealPlanStore.GetEntriesAsync(id, cancellationToken);
+        var inRange = entries.Where(e =>
+            e.Type == "recipe" &&
+            !string.IsNullOrWhiteSpace(e.RecipeId) &&
+            string.CompareOrdinal(e.Date, request.From) >= 0 &&
+            string.CompareOrdinal(e.Date, request.To) <= 0);
+
+        // Exact-match merge (same name + unit, case-insensitive), mirroring the frontend's
+        // ShoppingListService.addItem behavior — see planning/epic-f7-meal-planner-integration.md.
+        var merged = new Dictionary<(string Name, string Unit), double>();
+        var displayNames = new Dictionary<(string Name, string Unit), string>();
+
+        foreach (var entry in inRange)
+        {
+            var recipe = await recipeStore.GetByIdAsync(entry.RecipeId!, cancellationToken);
+            if (recipe is null || recipe.Servings <= 0)
+            {
+                continue;
+            }
+
+            var plannedServings = entry.Servings ?? recipe.Servings;
+            var scale = plannedServings / (double)recipe.Servings;
+
+            foreach (var ingredient in recipe.Ingredients)
+            {
+                var key = (ingredient.Name.Trim().ToLowerInvariant(), ingredient.Unit.Trim().ToLowerInvariant());
+                merged[key] = merged.GetValueOrDefault(key) + ingredient.Amount * scale;
+                displayNames.TryAdd(key, ingredient.Name.Trim());
+            }
+        }
+
+        var existingItems = await shoppingListStore.GetItemsAsync(ownerKey, cancellationToken);
+        var added = new List<ShoppingListItem>();
+
+        foreach (var (key, amount) in merged)
+        {
+            var existingItem = existingItems.FirstOrDefault(i =>
+                i.Name.Equals(key.Name, StringComparison.OrdinalIgnoreCase) &&
+                i.Unit.Equals(key.Unit, StringComparison.OrdinalIgnoreCase));
+
+            var item = new ShoppingListItem
+            {
+                Id = existingItem?.Id ?? Guid.NewGuid().ToString("n"),
+                Name = existingItem?.Name ?? displayNames[key],
+                Amount = (existingItem?.Amount ?? 0) + amount,
+                Unit = existingItem?.Unit ?? key.Unit,
+                Notes = existingItem?.Notes ?? string.Empty,
+                Checked = existingItem?.Checked ?? false,
+                UpdatedAt = DateTime.UtcNow,
+            };
+
+            var saved = await shoppingListStore.UpsertItemAsync(ownerKey, item, cancellationToken);
+            added.Add(saved);
+        }
+
+        return Ok(added);
+    }
+
     // ── Collaborators ────────────────────────────────────────────────────────
 
     [HttpPost("{id}/collaborators")]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<ActionResult<MealPlan>> AddCollaborator(string id, [FromBody] AddCollaboratorRequest request, CancellationToken cancellationToken)
     {
         if (!TryResolveUser(out var ownerKey, out _, out var error))
@@ -257,6 +358,7 @@ public sealed class MealPlansController(IMealPlanStore mealPlanStore) : Controll
     }
 
     [HttpDelete("{id}/collaborators/{email}")]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<ActionResult<MealPlan>> RemoveCollaborator(string id, string email, CancellationToken cancellationToken)
     {
         if (!TryResolveUser(out var ownerKey, out _, out var error))
@@ -287,12 +389,7 @@ public sealed class MealPlansController(IMealPlanStore mealPlanStore) : Controll
 
     private bool TryResolveUser(out string ownerKey, out string userEmail, out string? error)
     {
-        var subject =
-            User.FindFirstValue("sub") ??
-            User.FindFirstValue(ClaimTypes.NameIdentifier) ??
-            User.FindFirstValue("nameidentifier");
-
-        if (string.IsNullOrWhiteSpace(subject))
+        if (!User.TryGetSubject(out var subject))
         {
             ownerKey = string.Empty;
             userEmail = string.Empty;
@@ -300,13 +397,8 @@ public sealed class MealPlansController(IMealPlanStore mealPlanStore) : Controll
             return false;
         }
 
-        var email =
-            User.FindFirstValue("email") ??
-            User.FindFirstValue(ClaimTypes.Email) ??
-            string.Empty;
-
         ownerKey = $"user:{subject}";
-        userEmail = email.ToLowerInvariant();
+        userEmail = User.GetEmail();
         error = null;
         return true;
     }

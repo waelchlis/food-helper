@@ -1,8 +1,8 @@
-using System.Security.Claims;
 using FoodHelper.Api.Contracts;
 using FoodHelper.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace FoodHelper.Api.Controllers;
 
@@ -19,6 +19,7 @@ public sealed class AdminController(IAdminStore adminStore) : ControllerBase
     }
 
     [HttpPost]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<IActionResult> Add([FromBody] AddAdminRequest request, CancellationToken cancellationToken)
     {
         var admin = await adminStore.AddByEmailAsync(request.Email, cancellationToken);
@@ -26,10 +27,10 @@ public sealed class AdminController(IAdminStore adminStore) : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<IActionResult> Remove(string id, CancellationToken cancellationToken)
     {
-        var currentSubject = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                             ?? User.FindFirstValue("sub");
+        User.TryGetSubject(out var currentSubject);
 
         var admins = await adminStore.GetAllAsync(cancellationToken);
         var target = admins.FirstOrDefault(a => a.Id == id);

@@ -8,6 +8,7 @@ import { RecipeDetailComponent } from './recipe-detail';
 import { RecipeService } from '../../services/recipe';
 import { ShoppingListService } from '../../services/shopping-list';
 import { AuthService } from '../../services/auth';
+import { FavoriteService } from '../../services/favorite';
 
 describe('RecipeDetailComponent', () => {
   let component: RecipeDetailComponent;
@@ -27,6 +28,7 @@ describe('RecipeDetailComponent', () => {
           useValue: {
             loadRecipeById: () => of(undefined),
             scaleIngredients: () => [],
+            getSimilar: () => of([]),
           },
         },
         {
@@ -40,6 +42,10 @@ describe('RecipeDetailComponent', () => {
         {
           provide: AuthService,
           useValue: { isAuthenticated: () => false },
+        },
+        {
+          provide: FavoriteService,
+          useValue: { isFavorite: () => false, toggle: () => {} },
         },
       ],
     }).compileComponents();
