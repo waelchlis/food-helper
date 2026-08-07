@@ -32,7 +32,7 @@ scripts/    dev.sh — runs both apps together
 
 ## Frontend setup
 
-1. Configure Google OAuth values in `frontend/src/environments/environment.ts` (local dev) and `frontend/src/environments/environment.prod.ts` (production build — these are placeholders checked into the repo and must be filled in with real values before deploying; see `angular.json`'s `fileReplacements`).
+1. Google OAuth values live in `frontend/src/environments/environment.ts` (used by `ng serve`) and `frontend/src/environments/environment.prod.ts` (swapped in for production builds via `angular.json`'s `fileReplacements`). Both currently point at the same Google OAuth client — update both files together if the client ID ever changes.
 2. Install dependencies:
 
 ```bash

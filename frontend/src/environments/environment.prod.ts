@@ -1,8 +1,6 @@
-// Production values are supplied at deploy time — do not commit real secrets here.
-// See README.md "Deployment" section for how these get filled in before a production build.
 export const environment = {
   production: true,
   apiBaseUrl: '/api',
-  googleClientId: 'REPLACE_AT_DEPLOY_TIME',
+  googleClientId: '826608436834-13b4qice7og3ufac62l8b24r2mpio28q.apps.googleusercontent.com',
   oidcIssuer: 'https://accounts.google.com',
 };
