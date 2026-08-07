@@ -11,12 +11,7 @@ public static class OwnerKeyResolver
     {
         if (user.Identity?.IsAuthenticated == true)
         {
-            var subject =
-                user.FindFirstValue("sub") ??
-                user.FindFirstValue(ClaimTypes.NameIdentifier) ??
-                user.FindFirstValue("nameidentifier");
-
-            if (string.IsNullOrWhiteSpace(subject))
+            if (!user.TryGetSubject(out var subject))
             {
                 ownerKey = string.Empty;
                 error = "Authenticated token is missing subject (sub) claim.";

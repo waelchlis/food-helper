@@ -93,6 +93,14 @@
         <mat-icon>chevron_right</mat-icon>
       </button>
       <button mat-stroked-button class="today-btn" (click)="goToToday()">Today</button>
+      <button mat-raised-button color="accent" class="generate-list-btn" [disabled]="generatingShoppingList()" (click)="generateShoppingListForMonth()">
+        @if (generatingShoppingList()) {
+          <mat-progress-spinner mode="indeterminate" diameter="18"></mat-progress-spinner>
+        } @else {
+          <mat-icon>shopping_cart</mat-icon>
+        }
+        Generate Shopping List for {{ monthLabel() }}
+      </button>
     </div>
 
     <!-- Desktop calendar grid -->

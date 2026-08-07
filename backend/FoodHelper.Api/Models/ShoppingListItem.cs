@@ -20,6 +20,9 @@ public sealed class ShoppingListItem
     [FirestoreProperty("notes")]
     public string Notes { get; set; } = string.Empty;
 
+    [FirestoreProperty("checked")]
+    public bool Checked { get; set; }
+
     [FirestoreProperty("updatedAt")]
     public DateTime UpdatedAt { get; set; }
 }

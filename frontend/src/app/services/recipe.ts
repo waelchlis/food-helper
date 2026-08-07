@@ -20,17 +20,55 @@ export interface Recipe {
   ingredients: Ingredient[];
   instructions: string[];
   tips: string[];
-  image?: string;
+  images: string[];
   categoryId?: string;
   dietType?: 'vegan' | 'vegetarian';
+  note?: string;
   creatorName?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
+export interface RecipeRevision {
+  id: string;
+  recipeId: string;
+  snapshot: Recipe;
+  editorSubject: string;
+  editorName: string;
+  createdAt: string;
+}
+
+export interface RecipeImportResult {
+  name: string;
+  success: boolean;
+  id?: string;
+  error?: string;
+}
+
+export interface RecipeQuery {
+  q?: string;
+  ingredient?: string;
+  categoryId?: string;
+  dietType?: string;
+  maxTotalTime?: number;
+  sort?: 'newest' | 'name' | 'totalTime';
+  cursor?: string;
+  pageSize?: number;
+}
+
+export interface RecipePage {
+  items: Recipe[];
+  nextCursor: string | null;
+}
+
 type RecipeDto = Omit<Recipe, 'createdAt' | 'updatedAt'> & {
   createdAt: string;
   updatedAt: string;
+};
+
+type RecipePageDto = {
+  items: RecipeDto[];
+  nextCursor: string | null;
 };
 
 @Injectable({
@@ -55,11 +93,32 @@ export class RecipeService {
 
   constructor() {}
 
+  /** Loads the full recipe collection into the shared in-memory cache used by the wheel of fortune, the add-meal dialog, etc. */
   refreshRecipes(): Observable<Recipe[]> {
-    return this.http.get<RecipeDto[]>(this.apiUrl).pipe(
-      map(items => items.map(item => this.fromDto(item))),
+    return this.queryRecipes({ pageSize: 200 }).pipe(
+      map(page => page.items),
       tap(items => this.recipes.set(items)),
       catchError(() => of(this.recipes()))
+    );
+  }
+
+  /** Server-side combined filter + sort + cursor pagination, used directly by the recipe list search UI. */
+  queryRecipes(query: RecipeQuery): Observable<RecipePage> {
+    let params: Record<string, string> = {};
+    if (query.q) params['q'] = query.q;
+    if (query.ingredient) params['ingredient'] = query.ingredient;
+    if (query.categoryId) params['categoryId'] = query.categoryId;
+    if (query.dietType) params['dietType'] = query.dietType;
+    if (query.maxTotalTime) params['maxTotalTime'] = String(query.maxTotalTime);
+    if (query.sort) params['sort'] = query.sort;
+    if (query.cursor) params['cursor'] = query.cursor;
+    if (query.pageSize) params['pageSize'] = String(query.pageSize);
+
+    return this.http.get<RecipePageDto>(this.apiUrl, { params }).pipe(
+      map(page => ({
+        items: page.items.map(item => this.fromDto(item)),
+        nextCursor: page.nextCursor,
+      }))
     );
   }
 
@@ -80,6 +139,17 @@ export class RecipeService {
       }),
       catchError(() => of(this.getRecipeById(id)))
     );
+  }
+
+  getSimilar(id: string): Observable<Recipe[]> {
+    return this.http.get<RecipeDto[]>(`${this.apiUrl}/${id}/similar`).pipe(
+      map(items => items.map(item => this.fromDto(item))),
+      catchError(() => of([]))
+    );
+  }
+
+  getHistory(id: string): Observable<RecipeRevision[]> {
+    return this.http.get<RecipeRevision[]>(`${this.apiUrl}/${id}/history`);
   }
 
   createRecipe(recipe: Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'>): Observable<Recipe> {
@@ -104,9 +174,10 @@ export class RecipeService {
       ingredients: updates.ingredients ?? existing.ingredients,
       instructions: updates.instructions ?? existing.instructions,
       tips: updates.tips ?? existing.tips,
-      image: updates.image ?? existing.image,
+      images: updates.images ?? existing.images,
       categoryId: updates.categoryId ?? existing.categoryId,
       dietType: 'dietType' in updates ? updates.dietType : existing.dietType,
+      note: 'note' in updates ? updates.note : existing.note,
     };
 
     return this.http.put<RecipeDto>(`${this.apiUrl}/${id}`, payload).pipe(
@@ -133,26 +204,26 @@ export class RecipeService {
     );
   }
 
-  searchRecipes(query: string): Recipe[] {
-    const lowerQuery = query.toLowerCase();
-    return this.recipes().filter(recipe =>
-      recipe.name.toLowerCase().includes(lowerQuery) ||
-      recipe.description.toLowerCase().includes(lowerQuery)
+  removeImage(recipeId: string, url: string): Observable<Recipe> {
+    return this.http.request<RecipeDto>('DELETE', `${this.apiUrl}/${recipeId}/images`, { body: { url } }).pipe(
+      map(item => this.fromDto(item)),
+      tap(saved => this.recipes.set(this.upsertInMemory(this.recipes(), saved)))
     );
   }
 
-  filterByIngredient(ingredientName: string): Recipe[] {
-    return this.recipes().filter(recipe =>
-      recipe.ingredients.some(ing => ing.name.toLowerCase() === ingredientName.toLowerCase())
+  reorderImages(recipeId: string, images: string[]): Observable<Recipe> {
+    return this.http.put<RecipeDto>(`${this.apiUrl}/${recipeId}/images/order`, { images }).pipe(
+      map(item => this.fromDto(item)),
+      tap(saved => this.recipes.set(this.upsertInMemory(this.recipes(), saved)))
     );
   }
 
-  filterByCategory(categoryId: string): Recipe[] {
-    return this.recipes().filter(recipe => recipe.categoryId === categoryId);
+  exportRecipes(): Observable<Recipe[]> {
+    return this.http.get<RecipeDto[]>(`${this.apiUrl}/export`).pipe(map(items => items.map(item => this.fromDto(item))));
   }
 
-  filterByMaxTotalTime(maxMinutes: number): Recipe[] {
-    return this.recipes().filter(recipe => recipe.prepTime + recipe.cookTime <= maxMinutes);
+  importRecipes(items: Omit<Recipe, 'id' | 'createdAt' | 'updatedAt' | 'creatorName'>[]): Observable<RecipeImportResult[]> {
+    return this.http.post<RecipeImportResult[]>(`${this.apiUrl}/import`, items);
   }
 
   scaleIngredients(recipe: Recipe, servings: number): Ingredient[] {
@@ -166,6 +237,7 @@ export class RecipeService {
   private fromDto(recipe: RecipeDto): Recipe {
     return {
       ...recipe,
+      images: recipe.images ?? [],
       createdAt: new Date(recipe.createdAt),
       updatedAt: new Date(recipe.updatedAt),
     };
@@ -180,4 +252,3 @@ export class RecipeService {
     return recipes.map(item => (item.id === recipe.id ? recipe : item));
   }
 }
-

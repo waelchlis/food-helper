@@ -14,6 +14,7 @@ describe('App', () => {
           useValue: {
             isReady: () => true,
             isAuthenticated: () => false,
+            isAdmin: () => false,
             isConfigured: () => true,
             userDisplayName: () => 'Test User',
             login: () => {},
@@ -35,6 +36,6 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.app-title')?.textContent).toContain('Food Helper');
+    expect(compiled.querySelector('.app-title')?.textContent).toContain('Forkfolio');
   });
 });

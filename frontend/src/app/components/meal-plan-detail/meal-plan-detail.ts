@@ -15,6 +15,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MealEntry, MealPlan, MealPlanService } from '../../services/meal-plan';
 import { AuthService } from '../../services/auth';
+import { ShoppingListService } from '../../services/shopping-list';
+import { Router } from '@angular/router';
 import { AddMealDialogComponent, AddMealDialogData } from '../add-meal-dialog/add-meal-dialog';
 import {
   EditMealPlanDialogComponent,
@@ -68,6 +70,7 @@ export class MealPlanDetailComponent implements OnInit {
   newCollaboratorEmail = signal('');
   addingCollaborator = signal(false);
   removingEmail = signal<string | null>(null);
+  generatingShoppingList = signal(false);
 
   readonly weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -157,6 +160,8 @@ export class MealPlanDetailComponent implements OnInit {
     private authService: AuthService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
+    private shoppingListService: ShoppingListService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -321,6 +326,35 @@ export class MealPlanDetailComponent implements OnInit {
       error: () => {
         this.removingEmail.set(null);
         this.snackBar.open('Failed to remove collaborator.', 'Dismiss', { duration: 4000 });
+      },
+    });
+  }
+
+  generateShoppingListForMonth(): void {
+    const planId = this.plan()?.id;
+    if (!planId || this.generatingShoppingList()) return;
+
+    const year = this.viewYear();
+    const month = this.viewMonth();
+    const from = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    const to = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+    this.generatingShoppingList.set(true);
+    this.mealPlanService.generateShoppingList(planId, from, to).subscribe({
+      next: items => {
+        this.generatingShoppingList.set(false);
+        this.shoppingListService.refresh();
+        const ref = this.snackBar.open(
+          `Added ${items.length} ingredient${items.length === 1 ? '' : 's'} to your shopping list.`,
+          'View',
+          { duration: 4000, panelClass: 'snack-success' }
+        );
+        ref.onAction().subscribe(() => this.router.navigate(['/shopping-list']));
+      },
+      error: () => {
+        this.generatingShoppingList.set(false);
+        this.snackBar.open('Failed to generate shopping list.', 'Dismiss', { duration: 4000 });
       },
     });
   }

@@ -28,6 +28,15 @@ public sealed class MealEntry
     [FirestoreProperty("recipeImage")]
     public string? RecipeImage { get; set; }
 
+    /// <summary>
+    /// Planned serving count for this entry, independent of the recipe's own base Servings.
+    /// Defaults to the recipe's Servings when the entry is added, but can be overridden
+    /// (e.g. "make this for 6 people even though it's a 4-serving recipe"). Used to scale
+    /// ingredient amounts when generating a shopping list from the plan.
+    /// </summary>
+    [FirestoreProperty("servings")]
+    public int? Servings { get; set; }
+
     /// <summary>Set when Type is "custom".</summary>
     [FirestoreProperty("customText")]
     public string? CustomText { get; set; }

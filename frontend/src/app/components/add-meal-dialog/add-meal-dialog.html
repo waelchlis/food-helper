@@ -12,40 +12,68 @@
         Existing Recipe
       </ng-template>
 
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
-        <mat-label>Search recipes</mat-label>
-        <input matInput [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
-          placeholder="Type to filter..." autofocus>
-        <mat-icon matSuffix>search</mat-icon>
-      </mat-form-field>
-
-      @if (loadingRecipes()) {
-        <div class="loading-recipes">
-          <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
+      @if (selectedRecipe(); as recipe) {
+        <div class="servings-step">
+          <button mat-button (click)="backToSearch()">
+            <mat-icon>arrow_back</mat-icon>
+            Back to search
+          </button>
+          <div class="selected-recipe-row">
+            @if (recipe.images && recipe.images.length > 0) {
+              <img class="recipe-thumb-sm" [src]="recipe.images[0]" [alt]="recipe.name">
+            } @else {
+              <div class="recipe-thumb-sm no-image">
+                <mat-icon>restaurant</mat-icon>
+              </div>
+            }
+            <span class="recipe-row-name">{{ recipe.name }}</span>
+          </div>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Servings</mat-label>
+            <input matInput type="number" min="1" [ngModel]="servings()" (ngModelChange)="servings.set($event)">
+            <mat-hint>Recipe's own serving size is {{ recipe.servings }} — override if planning a different amount.</mat-hint>
+          </mat-form-field>
+          <button mat-raised-button color="primary" class="add-btn" [disabled]="servings() < 1" (click)="confirmRecipe()">
+            <mat-icon>add</mat-icon>
+            Add to plan
+          </button>
         </div>
-      } @else if (filteredRecipes().length === 0) {
-        <p class="no-results">No recipes match your search.</p>
       } @else {
-        <div class="recipe-list">
-          @for (recipe of filteredRecipes(); track recipe.id) {
-            <button class="recipe-row" (click)="selectRecipe(recipe)">
-              @if (recipe.image) {
-                <img class="recipe-thumb-sm" [src]="recipe.image" [alt]="recipe.name">
-              } @else {
-                <div class="recipe-thumb-sm no-image">
-                  <mat-icon>restaurant</mat-icon>
-                </div>
-              }
-              <span class="recipe-row-name">{{ recipe.name }}</span>
-              @if (recipe.prepTime + recipe.cookTime > 0) {
-                <span class="recipe-row-time">
-                  <mat-icon>schedule</mat-icon>
-                  {{ recipe.prepTime + recipe.cookTime }} min
-                </span>
-              }
-            </button>
-          }
-        </div>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
+          <mat-label>Search recipes</mat-label>
+          <input matInput [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+            placeholder="Type to filter..." autofocus>
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        @if (loadingRecipes()) {
+          <div class="loading-recipes">
+            <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
+          </div>
+        } @else if (filteredRecipes().length === 0) {
+          <p class="no-results">No recipes match your search.</p>
+        } @else {
+          <div class="recipe-list">
+            @for (recipe of filteredRecipes(); track recipe.id) {
+              <button class="recipe-row" (click)="pickRecipe(recipe)">
+                @if (recipe.images && recipe.images.length > 0) {
+                  <img class="recipe-thumb-sm" [src]="recipe.images[0]" [alt]="recipe.name">
+                } @else {
+                  <div class="recipe-thumb-sm no-image">
+                    <mat-icon>restaurant</mat-icon>
+                  </div>
+                }
+                <span class="recipe-row-name">{{ recipe.name }}</span>
+                @if (recipe.prepTime + recipe.cookTime > 0) {
+                  <span class="recipe-row-time">
+                    <mat-icon>schedule</mat-icon>
+                    {{ recipe.prepTime + recipe.cookTime }} min
+                  </span>
+                }
+              </button>
+            }
+          </div>
+        }
       }
     </mat-tab>
 

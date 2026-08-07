@@ -13,13 +13,13 @@
   <div class="search-filter-section">
     <mat-form-field appearance="outline" class="search-field">
       <mat-label>Search recipes</mat-label>
-      <input matInput [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()" placeholder="Search by name or description...">
+      <input matInput [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); runQuery()" placeholder="Search by name or description...">
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Filter by ingredient</mat-label>
-      <mat-select [(ngModel)]="selectedIngredient" (ngModelChange)="onIngredientChange()">
+      <mat-select [ngModel]="selectedIngredient()" (ngModelChange)="selectedIngredient.set($event); runQuery()">
         <mat-option value="">All Ingredients</mat-option>
         @for (ingredient of allIngredients(); track ingredient) {
           <mat-option [value]="ingredient">{{ ingredient }}</mat-option>
@@ -29,7 +29,7 @@
 
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Filter by category</mat-label>
-      <mat-select [(ngModel)]="selectedCategory" (ngModelChange)="onCategoryChange()">
+      <mat-select [ngModel]="selectedCategory()" (ngModelChange)="selectedCategory.set($event); runQuery()">
         <mat-option value="">All Categories</mat-option>
         @for (category of allCategories(); track category.id) {
           <mat-option [value]="category.id">{{ category.name }}</mat-option>
@@ -39,7 +39,7 @@
 
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Max total time</mat-label>
-      <mat-select [(ngModel)]="maxTotalTime">
+      <mat-select [ngModel]="maxTotalTime()" (ngModelChange)="maxTotalTime.set($event); runQuery()">
         <mat-option [value]="0">Any duration</mat-option>
         @for (opt of timeOptions; track opt.value) {
           <mat-option [value]="opt.value">≤ {{ opt.label }}</mat-option>
@@ -47,16 +47,32 @@
       </mat-select>
     </mat-form-field>
 
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Sort by</mat-label>
+      <mat-select [ngModel]="sort()" (ngModelChange)="sort.set($event); runQuery()">
+        <mat-option value="newest">Newest</mat-option>
+        <mat-option value="name">Name (A–Z)</mat-option>
+        <mat-option value="totalTime">Total time</mat-option>
+      </mat-select>
+    </mat-form-field>
+
     <div class="diet-filter">
-      <button class="diet-filter-btn" [class.active]="selectedDietType().includes('vegetarian')" (click)="selectedDietType.set(selectedDietType().includes('vegetarian') ? selectedDietType().filter(t => t !== 'vegetarian') : [...selectedDietType(), 'vegetarian'])" title="Vegetarian">
+      <button class="diet-filter-btn" [class.active]="selectedDietType().includes('vegetarian')" (click)="toggleDietType('vegetarian')" title="Vegetarian">
         <img src="kein-fleisch.png" alt="Vegetarian">
       </button>
-      <button class="diet-filter-btn" [class.active]="selectedDietType().includes('vegan')" (click)="selectedDietType.set(selectedDietType().includes('vegan') ? selectedDietType().filter(t => t !== 'vegan') : [...selectedDietType(), 'vegan'])" title="Vegan">
+      <button class="diet-filter-btn" [class.active]="selectedDietType().includes('vegan')" (click)="toggleDietType('vegan')" title="Vegan">
         <img src="vegan.png" alt="Vegan">
       </button>
     </div>
 
-    @if (searchQuery() || selectedIngredient() || selectedCategory() || selectedDietType().length || maxTotalTime()) {
+    @if (authService.isAuthenticated()) {
+      <button mat-stroked-button [class.active]="showFavoritesOnly()" (click)="showFavoritesOnly.set(!showFavoritesOnly())">
+        <mat-icon>{{ showFavoritesOnly() ? 'favorite' : 'favorite_border' }}</mat-icon>
+        Favorites only
+      </button>
+    }
+
+    @if (hasActiveFilters()) {
       <button mat-stroked-button (click)="clearFilters()">
         <mat-icon>clear</mat-icon>
         Clear Filters
@@ -65,22 +81,42 @@
   </div>
 
   <!-- Recipes Grid -->
-  <div class="recipes-grid">
-    @if (filteredRecipes().length > 0) {
-      @for (recipe of filteredRecipes(); track recipe.id) {
-        <app-recipe-card
-          [recipe]="recipe"
-          [canManageRecipes]="authService.isAdmin()"
-          (delete)="deleteRecipe($event)">
-        </app-recipe-card>
+  @if (loading()) {
+    <div class="no-recipes">
+      <p>Loading recipes…</p>
+    </div>
+  } @else {
+    <div class="recipes-grid">
+      @if (displayedRecipes().length > 0) {
+        @for (recipe of displayedRecipes(); track recipe.id) {
+          <app-recipe-card
+            [recipe]="recipe"
+            [canManageRecipes]="authService.isAdmin()"
+            [showFavoriteToggle]="authService.isAuthenticated()"
+            [isFavorite]="favoriteService.isFavorite(recipe.id)"
+            (delete)="deleteRecipe($event)"
+            (toggleFavorite)="toggleFavorite($event)">
+          </app-recipe-card>
+        }
+      } @else {
+        <div class="no-recipes">
+          <mat-icon>restaurant</mat-icon>
+          <p>No recipes found</p>
+          <p class="hint">Try adjusting your search or filters</p>
+        </div>
       }
-    } @else {
-      <div class="no-recipes">
-        <mat-icon>restaurant</mat-icon>
-        <p>No recipes found</p>
-        <p class="hint">Try adjusting your search or filters</p>
+    </div>
+
+    @if (!showFavoritesOnly() && nextCursor()) {
+      <div class="load-more">
+        <button mat-stroked-button [disabled]="loadingMore()" (click)="loadMore()">
+          @if (loadingMore()) {
+            Loading…
+          } @else {
+            Load more
+          }
+        </button>
       </div>
     }
-  </div>
+  }
 </div>
-

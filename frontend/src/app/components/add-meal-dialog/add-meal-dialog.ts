@@ -41,6 +41,8 @@ export class AddMealDialogComponent implements OnInit {
   searchQuery = signal('');
   customText = signal('');
   loadingRecipes = signal(false);
+  selectedRecipe = signal<Recipe | null>(null);
+  servings = signal(1);
 
   filteredRecipes = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
@@ -67,14 +69,26 @@ export class AddMealDialogComponent implements OnInit {
     }
   }
 
-  selectRecipe(recipe: Recipe): void {
-    // Immediately close and return the entry — no extra confirmation step.
+  pickRecipe(recipe: Recipe): void {
+    this.selectedRecipe.set(recipe);
+    this.servings.set(recipe.servings || 1);
+  }
+
+  backToSearch(): void {
+    this.selectedRecipe.set(null);
+  }
+
+  confirmRecipe(): void {
+    const recipe = this.selectedRecipe();
+    if (!recipe) return;
+
     this.dialogRef.close({
       date: this.data.date,
       type: 'recipe',
       recipeId: recipe.id,
       recipeName: recipe.name,
-      recipeImage: recipe.image,
+      recipeImage: recipe.images?.[0],
+      servings: this.servings(),
     });
   }
 

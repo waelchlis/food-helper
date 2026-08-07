@@ -29,10 +29,12 @@ public sealed class UpsertRecipeRequest
 
     public List<string> Tips { get; init; } = [];
 
-    [MaxLength(2048)]
-    public string? Image { get; init; }
+    public List<string> Images { get; init; } = [];
 
     public string? CategoryId { get; init; }
 
     public string? DietType { get; init; }
+
+    [MaxLength(2000)]
+    public string? Note { get; init; }
 }

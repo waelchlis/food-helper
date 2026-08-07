@@ -2,6 +2,7 @@ using FoodHelper.Api.Models;
 using FoodHelper.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace FoodHelper.Api.Controllers;
 
@@ -18,6 +19,7 @@ public sealed class IngredientWordsController(IIngredientWordStore wordStore, IR
 
     [HttpPost]
     [Authorize(Policy = "AdminOnly")]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<ActionResult<IngredientWord>> Add([FromBody] AddIngredientWordRequest request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Name))
@@ -37,6 +39,7 @@ public sealed class IngredientWordsController(IIngredientWordStore wordStore, IR
 
     [HttpDelete("{id}")]
     [Authorize(Policy = "AdminOnly")]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken)
     {
         var word = (await wordStore.GetAllAsync(cancellationToken)).FirstOrDefault(w => w.Id == id);

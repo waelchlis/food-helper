@@ -70,8 +70,8 @@
         <div class="recipe-list">
           @for (recipe of filteredRecipes(); track recipe.id) {
             <button class="recipe-row" (click)="addRecipe(recipe)" [disabled]="savingEntry()">
-              @if (recipe.image) {
-                <img class="recipe-thumb-sm" [src]="recipe.image" [alt]="recipe.name">
+              @if (recipe.images && recipe.images.length > 0) {
+                <img class="recipe-thumb-sm" [src]="recipe.images[0]" [alt]="recipe.name">
               } @else {
                 <div class="recipe-thumb-sm no-image">
                   <mat-icon>restaurant</mat-icon>

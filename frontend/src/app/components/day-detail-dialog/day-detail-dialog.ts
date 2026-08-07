@@ -101,7 +101,8 @@ export class DayDetailDialogComponent implements OnInit {
       type: 'recipe',
       recipeId: recipe.id,
       recipeName: recipe.name,
-      recipeImage: recipe.image,
+      recipeImage: recipe.images?.[0],
+      servings: recipe.servings,
     };
     this.savingEntry.set(true);
     this.mealPlanService.addEntry(this.data.planId, payload).subscribe({

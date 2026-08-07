@@ -3,6 +3,7 @@ using FoodHelper.Api.Models;
 using FoodHelper.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace FoodHelper.Api.Controllers;
 
@@ -27,6 +28,7 @@ public sealed class ShoppingListController(IShoppingListStore shoppingListStore)
 
     [HttpPost("items")]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<ActionResult<ShoppingListItem>> AddItem(
         [FromBody] UpsertShoppingListItemRequest request,
         [FromHeader(Name = "X-Session-Id")] string? sessionId,
@@ -44,6 +46,7 @@ public sealed class ShoppingListController(IShoppingListStore shoppingListStore)
             Amount = request.Amount,
             Unit = request.Unit.Trim(),
             Notes = request.Notes.Trim(),
+            Checked = request.Checked,
             UpdatedAt = DateTime.UtcNow,
         };
 
@@ -53,6 +56,7 @@ public sealed class ShoppingListController(IShoppingListStore shoppingListStore)
 
     [HttpPut("items/{itemId}")]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<ActionResult<ShoppingListItem>> UpdateItem(
         string itemId,
         [FromBody] UpsertShoppingListItemRequest request,
@@ -71,6 +75,7 @@ public sealed class ShoppingListController(IShoppingListStore shoppingListStore)
             Amount = request.Amount,
             Unit = request.Unit.Trim(),
             Notes = request.Notes.Trim(),
+            Checked = request.Checked,
             UpdatedAt = DateTime.UtcNow,
         };
 
@@ -80,6 +85,7 @@ public sealed class ShoppingListController(IShoppingListStore shoppingListStore)
 
     [HttpDelete("items/{itemId}")]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<IActionResult> DeleteItem(
         string itemId,
         [FromHeader(Name = "X-Session-Id")] string? sessionId,
@@ -101,6 +107,7 @@ public sealed class ShoppingListController(IShoppingListStore shoppingListStore)
 
     [HttpDelete("items")]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.Writes)]
     public async Task<IActionResult> ClearItems(
         [FromHeader(Name = "X-Session-Id")] string? sessionId,
         CancellationToken cancellationToken)

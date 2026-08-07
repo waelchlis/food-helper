@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="FoodHelper.Api/FoodHelper.Api.csproj" />
+  <Project Path="FoodHelper.Api.Tests/FoodHelper.Api.Tests.csproj" />
 </Solution>

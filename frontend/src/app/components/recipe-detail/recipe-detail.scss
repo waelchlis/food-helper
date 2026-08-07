@@ -17,6 +17,44 @@
       object-fit: cover;
     }
 
+    .image-gallery {
+      position: relative;
+
+      .gallery-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.4);
+        color: #fff;
+
+        &.prev { left: 8px; }
+        &.next { right: 8px; }
+      }
+
+      .gallery-dots {
+        position: absolute;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 6px;
+
+        .dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          border: none;
+          background: rgba(255, 255, 255, 0.5);
+          cursor: pointer;
+          padding: 0;
+
+          &.active {
+            background: #fff;
+          }
+        }
+      }
+    }
+
     .no-image {
       height: 400px;
       background-color: #e4ddf0;
@@ -77,6 +115,27 @@
       color: rgba(255, 255, 255, 0.8);
       font-style: italic;
       margin-bottom: 1.5rem;
+    }
+
+    .recipe-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      background-color: #ede8f5;
+      border-left: 4px solid #7c3aed;
+      border-radius: 0 4px 4px 0;
+
+      mat-icon {
+        color: #7c3aed;
+        flex-shrink: 0;
+      }
+
+      p {
+        margin: 0;
+        line-height: 1.6;
+      }
     }
 
     .meta-section {
@@ -231,6 +290,47 @@
 
         mat-icon {
           color: #f59e0b;
+        }
+      }
+    }
+
+    .similar-card {
+      grid-column: 1 / -1;
+
+      .similar-list {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+      }
+
+      .similar-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 140px;
+        flex-shrink: 0;
+        text-decoration: none;
+        color: inherit;
+
+        img, .no-image-sm {
+          width: 140px;
+          height: 100px;
+          object-fit: cover;
+          border-radius: 6px;
+        }
+
+        .no-image-sm {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #e4ddf0;
+          color: #b39ddb;
+        }
+
+        span {
+          font-size: 0.9rem;
+          line-height: 1.3;
         }
       }
     }

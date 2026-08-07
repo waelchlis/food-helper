@@ -10,6 +10,7 @@ export interface ShoppingListItem {
   amount: number;
   unit: string;
   notes: string;
+  checked: boolean;
 }
 
 @Injectable({
@@ -74,6 +75,7 @@ export class ShoppingListService {
       amount: updates.amount ?? current.amount,
       unit: (updates.unit ?? current.unit).trim(),
       notes: (updates.notes ?? current.notes).trim(),
+      checked: updates.checked ?? current.checked,
     };
 
     this.http.put<ShoppingListItem>(`${this.apiUrl}/${id}`, payload, { headers: this.buildHeaders() })
@@ -85,10 +87,19 @@ export class ShoppingListService {
       .subscribe();
   }
 
+  toggleChecked(item: ShoppingListItem): void {
+    this.updateItem(item.id, { checked: !item.checked });
+  }
+
   clearAll(): void {
     this.http.delete<void>(this.apiUrl, { headers: this.buildHeaders() })
       .pipe(tap(() => this.items.set([])))
       .subscribe();
+  }
+
+  /** Re-fetches items from the server — used after another feature (e.g. meal-plan shopping-list generation) writes items via a different endpoint. */
+  refresh(): void {
+    this.loadItems();
   }
 
   private loadItems(): void {

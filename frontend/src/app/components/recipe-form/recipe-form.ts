@@ -11,10 +11,12 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { Recipe, RecipeService, Ingredient } from '../../services/recipe';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { Recipe, RecipeService, Ingredient, RecipeRevision } from '../../services/recipe';
 import { AuthService } from '../../services/auth';
 import { IngredientWordService } from '../../services/ingredient-word';
 import { CategoryService } from '../../services/category';
+import { ConfirmDialogService } from '../../shared/confirm-dialog';
 
 @Component({
   selector: 'app-recipe-form',
@@ -32,6 +34,7 @@ import { CategoryService } from '../../services/category';
     MatAutocompleteModule,
     MatSelectModule,
     MatButtonToggleModule,
+    MatSnackBarModule,
   ],
   templateUrl: './recipe-form.html',
   styleUrl: './recipe-form.scss',
@@ -47,11 +50,16 @@ export class RecipeFormComponent implements OnInit {
     ingredients: [],
     instructions: [],
     tips: [],
+    images: [],
   });
-  selectedImageFile: File | null = null;
-  imagePreview = signal<string | null>(null);
+  selectedImageFiles = signal<File[]>([]);
+  newImagePreviews = signal<string[]>([]);
   dietType = '';
   ingredientFilters = signal<Record<number, string>>({});
+  saving = signal(false);
+
+  history = signal<RecipeRevision[]>([]);
+  showHistory = signal(false);
 
   filteredIngredientWords = computed(() => {
     const words = this.ingredientWordService.allWords();
@@ -82,6 +90,8 @@ export class RecipeFormComponent implements OnInit {
     protected authService: AuthService,
     protected ingredientWordService: IngredientWordService,
     protected categoryService: CategoryService,
+    private confirmDialog: ConfirmDialogService,
+    private snackBar: MatSnackBar,
   ) {}
 
   ngOnInit(): void {
@@ -99,7 +109,7 @@ export class RecipeFormComponent implements OnInit {
         this.isEditMode.set(true);
         this.recipeService.loadRecipeById(id).subscribe(existingRecipe => {
           if (existingRecipe) {
-            this.recipe.set({ ...existingRecipe });
+            this.recipe.set({ ...existingRecipe, images: [...(existingRecipe.images || [])] });
             this.dietType = existingRecipe.dietType || '';
           }
         });
@@ -110,6 +120,7 @@ export class RecipeFormComponent implements OnInit {
           ingredients: [this.createEmptyIngredient()],
           instructions: [''],
           tips: [],
+          images: [],
         });
       }
     });
@@ -275,54 +286,126 @@ export class RecipeFormComponent implements OnInit {
     });
   }
 
-  onImageFileSelected(event: Event): void {
+  // ── Image gallery management ──────────────────────────────────────────
+
+  onImageFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
+    const files = Array.from(input.files || []);
+    if (files.length === 0) return;
 
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+    const invalid = files.find(f => !f.type.startsWith('image/'));
+    if (invalid) {
+      this.snackBar.open('Please select only image files.', 'Dismiss', { duration: 4000 });
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image must be smaller than 5 MB');
+    const tooLarge = files.find(f => f.size > 5 * 1024 * 1024);
+    if (tooLarge) {
+      this.snackBar.open('Each image must be smaller than 5 MB.', 'Dismiss', { duration: 4000 });
       return;
     }
 
-    this.selectedImageFile = file;
-    const reader = new FileReader();
-    reader.onload = () => this.imagePreview.set(reader.result as string);
-    reader.readAsDataURL(file);
+    this.selectedImageFiles.set([...this.selectedImageFiles(), ...files]);
+    for (const file of files) {
+      const reader = new FileReader();
+      reader.onload = () => this.newImagePreviews.set([...this.newImagePreviews(), reader.result as string]);
+      reader.readAsDataURL(file);
+    }
+    input.value = '';
   }
 
-  removeSelectedImage(): void {
-    this.selectedImageFile = null;
-    this.imagePreview.set(null);
+  removeQueuedImage(index: number): void {
+    this.selectedImageFiles.set(this.selectedImageFiles().filter((_, i) => i !== index));
+    this.newImagePreviews.set(this.newImagePreviews().filter((_, i) => i !== index));
   }
 
-  saveRecipe(): void {
+  async removeExistingImage(url: string): Promise<void> {
+    const recipeId = this.recipe().id;
+    if (!recipeId) return;
+
+    const confirmed = await this.confirmDialog.confirm({
+      title: 'Remove image',
+      message: 'Remove this image from the recipe?',
+      confirmLabel: 'Remove',
+      danger: true,
+    });
+    if (!confirmed) return;
+
+    this.recipeService.removeImage(recipeId, url).subscribe({
+      next: updated => this.recipe.set({ ...this.recipe(), images: updated.images }),
+      error: () => this.snackBar.open('Failed to remove image.', 'Dismiss', { duration: 4000 }),
+    });
+  }
+
+  moveExistingImage(index: number, direction: -1 | 1): void {
+    const recipeId = this.recipe().id;
+    const images = [...(this.recipe().images || [])];
+    const targetIndex = index + direction;
+    if (!recipeId || targetIndex < 0 || targetIndex >= images.length) return;
+
+    [images[index], images[targetIndex]] = [images[targetIndex], images[index]];
+    this.recipeService.reorderImages(recipeId, images).subscribe({
+      next: updated => this.recipe.set({ ...this.recipe(), images: updated.images }),
+      error: () => this.snackBar.open('Failed to reorder images.', 'Dismiss', { duration: 4000 }),
+    });
+  }
+
+  private uploadQueuedImages(recipeId: string): Promise<void> {
+    const files = this.selectedImageFiles();
+    if (files.length === 0) return Promise.resolve();
+
+    return new Promise((resolve) => {
+      let remaining = files.length;
+      files.forEach(file => {
+        this.recipeService.uploadImage(recipeId, file).subscribe({
+          next: () => {
+            remaining--;
+            if (remaining === 0) resolve();
+          },
+          error: () => {
+            remaining--;
+            if (remaining === 0) resolve();
+          },
+        });
+      });
+    });
+  }
+
+  // ── History (admin audit trail) ─────────────────────────────────────────
+
+  toggleHistory(): void {
+    const recipeId = this.recipe().id;
+    if (!recipeId) return;
+
+    this.showHistory.set(!this.showHistory());
+    if (this.showHistory() && this.history().length === 0) {
+      this.recipeService.getHistory(recipeId).subscribe(revisions => this.history.set(revisions));
+    }
+  }
+
+  // ── Save / cancel ────────────────────────────────────────────────────
+
+  async saveRecipe(): Promise<void> {
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/recipes']);
       return;
     }
 
     const recipe = this.recipe();
-    
-    // Validation
+
     if (!recipe.name?.trim()) {
-      alert('Recipe name is required');
+      this.snackBar.open('Recipe name is required.', 'Dismiss', { duration: 4000 });
       return;
     }
 
     const validIngredients = recipe.ingredients?.filter(ing => ing.name.trim());
     if (!validIngredients || validIngredients.length === 0) {
-      alert('At least one ingredient is required');
+      this.snackBar.open('At least one ingredient is required.', 'Dismiss', { duration: 4000 });
       return;
     }
 
     const validInstructions = recipe.instructions?.filter(inst => inst.trim());
     if (!validInstructions || validInstructions.length === 0) {
-      alert('At least one instruction is required');
+      this.snackBar.open('At least one instruction is required.', 'Dismiss', { duration: 4000 });
       return;
     }
 
@@ -331,32 +414,27 @@ export class RecipeFormComponent implements OnInit {
       ingredients: validIngredients,
       instructions: validInstructions,
       tips: (recipe.tips || []).filter(t => t.trim()),
+      images: recipe.images || [],
       dietType: (this.dietType || undefined) as 'vegan' | 'vegetarian' | undefined,
     } as Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'>;
 
+    this.saving.set(true);
+
     if (this.isEditMode() && recipe.id) {
-      this.recipeService.updateRecipe(recipe.id, { ...recipeData }).subscribe(updatedRecipe => {
+      this.recipeService.updateRecipe(recipe.id, { ...recipeData }).subscribe(async updatedRecipe => {
         if (updatedRecipe) {
-          if (this.selectedImageFile) {
-            this.recipeService.uploadImage(updatedRecipe.id, this.selectedImageFile).subscribe({
-              next: () => this.router.navigate(['/recipe', updatedRecipe.id]),
-              error: () => this.router.navigate(['/recipe', updatedRecipe.id]),
-            });
-          } else {
-            this.router.navigate(['/recipe', updatedRecipe.id]);
-          }
+          await this.uploadQueuedImages(updatedRecipe.id);
+          this.saving.set(false);
+          this.router.navigate(['/recipe', updatedRecipe.id]);
+        } else {
+          this.saving.set(false);
         }
       });
     } else {
-      this.recipeService.createRecipe(recipeData).subscribe(newRecipe => {
-        if (this.selectedImageFile) {
-          this.recipeService.uploadImage(newRecipe.id, this.selectedImageFile).subscribe({
-            next: () => this.router.navigate(['/recipe', newRecipe.id]),
-            error: () => this.router.navigate(['/recipe', newRecipe.id]),
-          });
-        } else {
-          this.router.navigate(['/recipe', newRecipe.id]);
-        }
+      this.recipeService.createRecipe(recipeData).subscribe(async newRecipe => {
+        await this.uploadQueuedImages(newRecipe.id);
+        this.saving.set(false);
+        this.router.navigate(['/recipe', newRecipe.id]);
       });
     }
   }
@@ -379,4 +457,3 @@ export class RecipeFormComponent implements OnInit {
     }
   }
 }
-

@@ -100,4 +100,34 @@
     flex: 1;
     min-width: 200px;
   }
+
+  .import-export-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .import-results {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+
+    .import-result-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+
+      &.success mat-icon { color: #4caf50; }
+      &.failure mat-icon { color: #f44336; }
+
+      .import-error {
+        color: #f44336;
+        font-size: 0.85rem;
+      }
+    }
+  }
 }
