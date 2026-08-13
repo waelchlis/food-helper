@@ -187,6 +187,8 @@
     }
 
     .section-card {
+      min-width: 0;
+
       mat-card-header {
         padding: 1.5rem;
         border-bottom: 1px solid #ddd6ed;
@@ -200,6 +202,7 @@
         font-size: 1.3rem;
         margin: 0;
         flex: 1;
+        min-width: 0;
       }
 
       .servings-control {
@@ -251,6 +254,9 @@
 
             .name {
               flex: 1;
+              min-width: 0;
+              overflow-wrap: break-word;
+              word-break: break-word;
             }
           }
         }
@@ -354,6 +360,32 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
+    }
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.6rem;
+
+      > button[mat-raised-button] {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .action-buttons-right {
+        width: 100%;
+        gap: 0.6rem;
+        justify-content: flex-end;
+
+        button[mat-icon-button] {
+          flex: 0 0 auto;
+        }
+
+        button[mat-raised-button] {
+          flex: 1 1 100%;
+          justify-content: center;
+        }
+      }
     }
   }
 }
